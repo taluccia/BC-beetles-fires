@@ -27,6 +27,7 @@ library(rgdal) # geospatial data
 library(raster)
 library(rgeos) # GIS Geometry
 library(foreign) # deals with dbf files
+library(dplyr)
 ```
 
 # Projection
@@ -64,15 +65,32 @@ en_perm_ea = spTransform(en_perm, CRS(ea_bc))
 
 # Convert to sf
 ```{r}
-tw_rdnbr_sf = st_as_sf(tw_perm_ea)
-ch_rdnbr_sf = st_as_sf(ch_perm_ea)
-en_rdnbr_sf = st_as_sf(en_perm_ea)
+tw_perm_sf = st_as_sf(tw_perm_ea)
+ch_perm_sf = st_as_sf(ch_perm_ea)
+en_perm_sf = st_as_sf(en_perm_ea)
 ```
 
 #  Write to shapefile
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 st_write(tw_rdnbr_sf, "../outputs/tw_R10252_2013_EA.shp", driver="ESRI Shapefile") 
 st_write(ch_rdnbr_sf, "../outputs/ch_R10070_2014_EA.shp", driver="ESRI Shapefile") 
 st_write(en_rdnbr_sf, "../outputs/en_R10171_2012_EA.shp", driver="ESRI Shapefile") 
 ```
+
+# Combine fire perimeters into single file
+
+```{r}
+all_perm = bind_rows(tw_perm_sf, ch_perm_sf, en_perm_sf)
+```
+
+```{r}
+plot(all_perm$geometry)
+```
+
+
+```{r eval=FALSE, include=FALSE}
+st_write(all_perm, "../outputs/all_perimeters_EA.shp", driver="ESRI Shapefile") 
+
+```
+
