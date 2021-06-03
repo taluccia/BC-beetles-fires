@@ -11,3 +11,12 @@
 4. Weather variables (R + GEE)
 5. Vegetation Indices (GEE)
 6. BRTs Analysis (R)
+
+
+
+
+## References
+
+### Spatial Data
+
+British Columbia [Fire Perimeters-Historical](https://catalogue.data.gov.bc.ca/dataset/fire-perimeters-historical) 
