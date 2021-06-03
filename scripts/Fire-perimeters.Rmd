@@ -1,0 +1,262 @@
+---
+title: "Fire perimeters"
+author: "Anna Talucci"
+date: "6/2/2021"
+output: html_document
+---
+
+# Overview
+
+FIRE_NO   | Fire name  | Year
+R10171    | Entiako   | 2012
+R10070    | Chelaslie  | 2014
+R10252    | Tweedsmuir  | 2013
+
+## VRI Data
+Was initiall clipped to polygons in ArcGIS Pro
+
+# Library
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
+```
+
+
+# Data
+
+## Fires
+```{r}
+fires = st_read("../data/PROT_HISTORICAL_FIRE_POLYS_SP/H_FIRE_PLY_polygon.shp", "H_FIRE_PLY_polygon") 
+```
+
+
+
+```{r}
+st_crs(fires)
+```
+
+
+```{r}
+head(fires)
+```
+# Projection 
+```{r}
+bc_crs=st_crs(fires)
+```
+
+
+#Data
+## Lakes
+
+```{r}
+lakes = st_read("../data/lakes/lakes_bc_alb.shp", "lakes_bc_alb") 
+```
+
+```{r}
+st_crs(lakes)
+```
+
+```{r}
+lakes_bc = st_transform(lakes, crs=bc_crs)
+```
+
+## VRI
+
+
+### Entiako
+```{r}
+vri1 = st_read("../data/VRI1/Entiako_VRI.shp", "Entiako_VRI") 
+```
+
+```{r}
+st_crs(vri1)
+```
+
+### Tweeds
+```{r}
+vri2 = st_read("../data/VRI1/Tweeds_VRI.shp", "Tweeds_VRI") 
+```
+
+```{r}
+st_crs(vri2)
+```
+
+### Chelaslie
+```{r}
+vri3 = st_read("../data/VRI1/Chelaslie_VRI.shp", "Chelaslie_VRI") 
+```
+
+```{r}
+st_crs(vri3)
+```
+
+```{r}
+head(vri3)
+```
+
+
+# Select Fires
+```{r}
+
+allFires = fires %>%
+  filter(FIRE_YEAR>2011) %>%
+  filter(FIRE_YEAR<2015) %>%
+  filter(SIZE_HA>3000) %>%
+  filter(FIRE_NO=="R10171" | FIRE_NO=="R10070" | FIRE_NO=="R10252")
+
+allFires 
+```
+
+
+
+# Select and Clip each perimeter
+## R10171    | Entiako   | 2012
+### Select
+```{r}
+
+fire1 = fires %>%
+  filter(FIRE_NO=="R10171") %>%
+  st_cast(.,"POLYGON") %>%
+  st_zm(., drop=TRUE)
+
+fire1
+```
+
+```{r}
+plot(st_geometry(fire1))
+
+```
+
+```{r}
+nonveg1 = vri1 %>% filter(BCLCS_LE_1!="T" | BCLCS_LEVE=="N")
+```
+```{r}
+plot(st_geometry(fire1))
+plot(st_geometry(nonveg1), add=TRUE)
+```
+
+### Clip by VRI
+
+
+```{r}
+st_is_valid(nonveg1)
+```
+
+```{r}
+st_is_valid(fire1)
+```
+```{r}
+diff1 = st_difference(st_make_valid(fire1), st_make_valid(st_combine(nonveg1)))
+```
+
+
+
+```{r}
+plot(st_geometry(diff1), col="blue")
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(diff1, "../outputs/perimeters/EntiakoTreed.shp", driver="ESRI Shapefile") 
+```
+
+## R10252    | Tweedsmuir  | 2013
+```{r}
+
+fire2 = fires %>%
+  filter(FIRE_NO=="R10252") %>%
+  st_cast(.,"POLYGON") %>%
+  st_zm(., drop=TRUE)
+
+fire2
+```
+
+```{r}
+plot(st_geometry(fire2))
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(fire2, "../outputs/perimeters/R10070.shp", driver="ESRI Shapefile") 
+```
+
+### Filter VRI
+```{r}
+nonveg2 = vri2 %>% filter(BCLCS_LE_1!="T" | BCLCS_LEVE=="N")
+```
+```{r}
+plot(st_geometry(fire2))
+plot(st_geometry(nonveg2), add=TRUE)
+```
+
+### Clip by VRI
+
+```{r}
+diff2 = st_difference(st_make_valid(fire2), st_make_valid(st_combine(nonveg2)))
+```
+
+
+
+```{r}
+plot(st_geometry(diff2), col="blue")
+```
+```{r eval=FALSE, include=FALSE}
+st_write(diff2, "../outputs/perimeters/TweedsTreed.shp", driver="ESRI Shapefile") 
+```
+
+## R10070    | Chelaslie  | 2014
+
+```{r}
+
+fire3 = fires %>%
+  filter(FIRE_NO=="R10070") %>%
+  st_cast(.,"POLYGON") %>%
+  st_zm(., drop=TRUE)
+
+fire3
+```
+
+```{r}
+plot(st_geometry(fire3))
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(fire3, "../outputs/perimeters/R10252.shp", driver="ESRI Shapefile") 
+```
+
+### Filter VRI
+```{r}
+nonveg3 = vri3 %>% filter(BCLCS_LE_1!="T" | BCLCS_LEVE=="N")
+```
+
+```{r}
+plot(st_geometry(fire3))
+plot(st_geometry(nonveg3), add=TRUE)
+```
+
+### Clip by VRI
+
+```{r}
+diff3 = st_difference(st_make_valid(fire3), st_make_valid(st_combine(nonveg3)))
+```
+
+
+
+```{r}
+plot(st_geometry(diff3), col="blue")
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(diff3, "../outputs/perimeters/ChelaslieTreed.shp", driver="ESRI Shapefile") 
+```
+
+
+
+
+

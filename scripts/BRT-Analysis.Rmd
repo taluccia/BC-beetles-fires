@@ -1,0 +1,226 @@
+---
+title: "BRT Analysis"
+author: "Anna Talucci"
+date: "05/24/2021"
+outputs: html_document
+---
+
+# Overview
+
+## Notes
+
+Copied from repo beetle-fire-landscape-bc BRTAnalyses.RMD
+
+
+--Beetle vs. Fuels
+
+Boosted Regression Trees in R 
+Note: this is a cut-down version of a tutorial prepared by Jane Elith and John Leathwick
+Adapted by Chris Dunn for fire risk assessment
+Adapted by Garrett Meigs for analysis of fire refugia
+Complementary to Krawchuk et al. 2016 Ecosphere scripts
+
+
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+
+## Set libraries
+```{r include=FALSE}
+
+library(devtools)
+library(gbm)
+library(foreign)
+library(dismo)
+library(dplyr)
+library(splines)
+library(ggplot2)
+```
+
+##Install additional BRT functions 
+These are provided in a file such as ?brt.functions.R? and can be loaded into R using the source command, e.g.:
+```{r}
+source("../function/brt.functions.R")
+```
+
+# Import data
+```{r}
+model.data = read.csv("../data/GRTS_Samples/2019-09-02_AllSamples.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+# Check dimensions, column names and order for later operations, and summary statistics
+```{r}
+head(model.data)
+```
+
+## Subset by FWI
+presence/absence (1/0) of high burn severity 
+```{r}
+model.data$fwi_lohi = ifelse(model.data$fwi <= 29, 1, 2)
+model.data$reclass_rdnbr_mt = ifelse(model.data$rdnbr < 316, 0, 1)
+model.data$reclass_rdnbr_fs = ifelse(model.data$rdnbr < 600, 0, 1)
+ 
+```
+2 is anything greater then 29 and 1 is anything less than or equal to 29
+```{r}
+head(model.data)
+```
+
+```{r}
+dim(model.data)
+```
+
+```{r}
+model.data.lo = subset(model.data, fwi_lohi == "1")
+```
+
+```{r}
+dim(model.data.lo)
+```
+```{r}
+model.data.lo %>%
+  count(reclass_rdnbr_fs) %>%
+  group_by(reclass_rdnbr_fs) 
+```
+
+```{r}
+model.data.lo %>%
+  count(reclass_rdnbr_mt) %>%
+  group_by(reclass_rdnbr_mt) 
+```
+
+```{r}
+model.data.hi = subset(model.data, fwi_lohi == "2")
+```
+
+```{r}
+dim(model.data.hi)
+```
+
+```{r}
+model.data.hi %>%
+  count(reclass_rdnbr_mt) %>%
+  group_by(reclass_rdnbr_mt) 
+```
+
+```{r}
+model.data.hi %>%
+  count(reclass_rdnbr_fs) %>%
+  group_by(reclass_rdnbr_fs) 
+```
+
+
+```{r}
+head(model.data)
+```
+
+```{r}
+names(model.data)
+```
+
+
+# MODEL 1 
+
+
+## Model 1: Split FWI - FWI HI 
+Run the BRT model
+with explanatory variables: 
+*  dndmi (15)
+*  elevation(17)
+*  fwi (18)
+*  ndviprefire (21)
+*  rdnbr_class(26)
+*  reclass_rdnbr_mt (34)
+*  reclass_rdnbr_fs (35)
+
+```{r}
+set.seed(15) # Set random seed
+brt.model1 <- gbm.step(data=model.data.hi,
+    gbm.x = c(15,17,18,21), ## 11 variables
+    gbm.y = 35,
+    family = "bernoulli",
+    tree.complexity = 5,
+    learning.rate = 0.001,
+    bag.fraction = 0.5)
+```
+
+### Get info in model outputs
+```{r}
+summary(brt.model1,
+        cBars=length(brt.model1$var.names),
+        n.trees=brt.model1$n.trees,
+        plotit=TRUE,
+        order=TRUE,
+        method=relative.influence,
+        normalize=FALSE)
+```
+
+### Save model outputs as external object for mapping later or posterity
+
+```{r}
+save(brt.model1, file = "../outputs/brtmodels/BRT_model1.rda")
+```
+
+```{r eval=FALSE, include=FALSE}
+load(file = "../outputs//brtmodels/BRT_model1.rda")
+```
+
+### Relative influence of predictors as part of summary gbm - for model assessment
+```{r}
+relative.influence(brt.model1, scale=TRUE, sort=TRUE)
+```
+
+Notes: permutation.test.gbm(brt.model, n.trees=brt.model$n.trees); This method randomly permutes each predictor variable at a time and computes the associated reduction in predictive performance, similar to random forests. gbm.loss(y,f,w,offset,dist,baseline, group, max.rank)
+
+### Plotting (Anna Added)
+```{r eval=FALSE, include=FALSE}
+gbm.plot(brt.model1, smooth=TRUE, write.title = FALSE)
+dev.print(pdf, "../figs/finalmodels_mt/2019-09-02_BRT_model1_plots.pdf")
+dev.off()
+```
+```{r eval=FALSE, include=FALSE}
+gbm.plot.fits(brt.model1)
+dev.print(pdf, "../figs/finalmodels_mt/2019-09-02_BRT_model1_fits_plots.pdf")
+dev.off()
+```
+
+```{r}
+find.int = gbm.interactions(brt.model1)
+find.int$rank.list
+find.int$interactions
+```
+
+## Calculate outputs stats 
+- Sandra Haire calculations and file export below from Krawchuk et al. (2016) Ecosphere
+Note that these calculatins are not the same as the default outputss from the BRT code.
+
+tot.n=nrow(temp2)
+    y.perc=round(nrow(temp2[temp2$yvar==1,])/tot.n,2)
+```{r}
+tot.n=nrow(model.data.hi)
+y.perc=round(nrow(model.data.hi[model.data.hi$yvar==1,])/tot.n,2)
+vnames=row.names(brt.model1$contributions)
+rel.inf=round(brt.model1$contributions[,2],2) # variable num, from df and %contrib for each
+perc.dev.expl=round(1-(brt.model1$self.statistics$mean.resid/brt.model1$self.statistics$mean.null),2)
+roc.mean=round(mean(brt.model1$cv.roc.matrix),2)
+cv.dev.mean=round(brt.model1$cv.statistics$deviance.mean,2)
+cv.cor.mean=round(brt.model1$cv.statistics$correlation.mean,2)
+cv.discrim.mean=round(brt.model1$cv.statistics$discrimination.mean,2)
+```
+
+```{r}
+tot.n
+model.data.hi$reclass_rdnbr_fs==1
+y.perc
+```
+
+```{r}
+BRT.model1.sum=data.frame(tot.n, y.perc, brt.model1$n.trees, perc.dev.expl, roc.mean, cv.dev.mean, cv.cor.mean, cv.discrim.mean)
+write.csv(BRT.model1.sum, '../outputs/brtSummary/BRT_model1_sum.csv', row.names = F)
+BRT.model1.relinf=data.frame(rel.inf, vnames)
+write.csv(BRT.model1.relinf, '../outputs/brtSummary/BRT_model1_relinf.csv', row.names = F)
+```
