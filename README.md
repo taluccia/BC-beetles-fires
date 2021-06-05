@@ -14,6 +14,18 @@
 
 
 
+# Preprocess 2021-06-05
+1. R---select perimeters from historical perimeter database
+2. AcrGIS---Subset  VRI  from  gdb  for each  perimeter
+3. R--clip perimeters to only treed areas (removes water, rock, meadows)
+4.
+
+# New Process 2021-06-05
+1. GEE---Export Rdnbr Raster with Landsat projection
+2. R---Convert raster to point
+3. R---Randomly sample 5% of points in each fire
+4. GEE---Extract data from GEE
+
 
 ## References
 
