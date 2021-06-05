@@ -6,8 +6,11 @@ output: html_document
 ---
 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
 ```
 
 # Overview
@@ -43,7 +46,7 @@ ea_bc = "+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0
 The perimeter used here as removed large bodies of water and meadows. We were primarily interested in characterizing the forested components. 
 
 ```{r}
-rdnbrpoly = readOGR("../data/tw_rdnbr_poly.shp", "tw_rdnbr_poly") 
+rdnbrpoly = readOGR("../data/RastertoPoly/tw_rdnbr_poly.shp", "tw_rdnbr_poly") 
 ```
 # Reproject in Equal area
 
