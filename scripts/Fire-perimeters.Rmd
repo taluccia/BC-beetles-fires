@@ -54,19 +54,7 @@ bc_crs=st_crs(fires)
 
 
 #Data
-## Lakes
 
-```{r}
-lakes = st_read("../data/lakes/lakes_bc_alb.shp", "lakes_bc_alb") 
-```
-
-```{r}
-st_crs(lakes)
-```
-
-```{r}
-lakes_bc = st_transform(lakes, crs=bc_crs)
-```
 
 ## VRI
 
