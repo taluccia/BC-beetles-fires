@@ -40,7 +40,10 @@ ea_bc = "+proj=aea +lat_1=50 +lat_2=58.5 +lat_0=45 +lon_0=-126 +x_0=1000000 +y_0
 
 # Read in raster
 ```{r}
-tw_rdnbr = raster("../data/rdnbr/TW_rdnbr.tif")
+tw_rdnbr = raster("../data/rdnbr/TW_rdnbr1.tif")
+```
+```{r}
+projection(tw_rdnbr)
 ```
 
 ```{r}
@@ -84,17 +87,17 @@ ch_clip <- mask(ch_rdnbr, ch_perm)
 ```
 # Plot
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 plot(tw_clip)
 plot(tw_perm, add=TRUE)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 plot(en_clip)
 plot(en_perm, add=TRUE)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 plot(ch_clip)
 plot(ch_perm, add=TRUE)
 ```
@@ -117,21 +120,22 @@ ch_rdnbr_poly = rasterToPolygons(ch_clip, fun=NULL, n=4, na.rm=TRUE, digits=12, 
 ```
 
 # Plot
-```{r}
+```{r eval=FALSE, include=FALSE}
 plot(tw_rdnbr_poly)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 plot(en_rdnbr_poly)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 plot(ch_rdnbr_poly)
 ```
 
 # Convert to sf
 ```{r}
 tw_rdnbr_sf = st_as_sf(tw_rdnbr_poly)
+st_crs(tw_rdnbr_sf)
 ```
 
 ```{r}
@@ -142,16 +146,32 @@ en_rdnbr_sf = st_as_sf(en_rdnbr_poly)
 ch_rdnbr_sf = st_as_sf(ch_rdnbr_poly)
 ```
 
+# Reproject to  EPSG 3005
+```{r}
+tw_rdnbr_bc = st_transform(tw_rdnbr_sf)
+st_crs(tw_rdnbr_bc)
+```
+
+```{r}
+en_rdnbr_bc = st_transform(en_rdnbr_sf) 
+st_crs(tw_rdnbr_bc)
+```
+
+```{r}
+ch_rdnbr_bc = st_transform(ch_rdnbr_sf)
+st_crs(ch_rdnbr_bc)
+```
+
 #  Write to shapefile
 
 ```{r}
-st_write(tw_rdnbr_sf, "../outputs/RastertoPoly/tw_rdnnbr_poly.shp", driver="ESRI Shapefile") 
+st_write(tw_rdnbr_bc, "../outputs/RastertoPoly/tw_rdnbr_poly.shp", driver="ESRI Shapefile") 
 ```
 
 ```{r}
-st_write(en_rdnbr_sf, "../outputs/RastertoPoly/en_rdnnbr_poly.shp", driver="ESRI Shapefile") 
+st_write(en_rdnbr_bc, "../outputs/RastertoPoly/en_rdnbr_poly.shp", driver="ESRI Shapefile") 
 ```
 
 ```{r}
-st_write(ch_rdnbr_sf, "../outputs/RastertoPoly/ch_rdnnbr_poly.shp", driver="ESRI Shapefile") 
+st_write(ch_rdnbr_bc, "../outputs/RastertoPoly/ch_rdnbr_poly.shp", driver="ESRI Shapefile") 
 ```
