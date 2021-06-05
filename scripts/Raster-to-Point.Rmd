@@ -1,0 +1,163 @@
+---
+title: "Raster to Point"
+author: "Anna Talucci"
+date: "6/5/2021"
+output: html_document
+---
+
+# Packages
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+```
+
+# Data
+## Rasters
+```{r}
+tw_rdnbr = raster("../data/rdnbr_epsg_32610/TW_rdnbr.tif")
+```
+
+```{r}
+en_rdnbr = raster("../data/rdnbr_epsg_32610/EN_rdnbr.tif")
+```
+
+```{r}
+ch_rdnbr = raster("../data/rdnbr_epsg_32610/CH_rdnbr.tif")
+```
+
+
+## Fire perimeters 
+```{r}
+tw_perm = st_read("../data/perimeters/TweedsTreed.shp", "TweedsTreed") 
+```
+
+```{r}
+en_perm = st_read("../data/perimeters/EntiakoTreed.shp", "EntiakoTreed") 
+```
+
+```{r}
+ch_perm = st_read("../data/perimeters/ChelaslieTreed.shp", "ChelaslieTreed") 
+```
+
+# Projection & Resolution
+
+## Raster Projection
+```{r}
+projection(tw_rdnbr)
+projection(en_rdnbr)
+projection(ch_rdnbr)
+```
+
+
+```{r}
+landsat_proj = projection(tw_rdnbr)
+landsat_proj 
+```
+
+##  Raster resolution
+
+```{r}
+res(tw_rdnbr)
+res(en_rdnbr)
+res(ch_rdnbr)
+```
+
+
+## Projection details for perimeter
+```{r}
+st_crs(tw_perm)
+st_crs(en_perm)
+st_crs(ch_perm)
+```
+
+## Transform perieters to Landsat Imagery  projection
+```{r}
+tw_32610 = st_transform(tw_perm, crs=landsat_proj)
+
+en_32610 = st_transform(en_perm, crs=landsat_proj)
+
+ch_32610 = st_transform(ch_perm, crs=landsat_proj)
+```
+
+# Plot to Check
+```{r}
+plot(tw_rdnbr)
+plot(tw_32610, add=TRUE)
+```
+
+
+
+# Clip raster to polygon
+```{r}
+tw_clip <- mask(tw_rdnbr, tw_32610)
+```
+
+```{r}
+en_clip <- mask(en_rdnbr, en_32610)
+```
+
+```{r}
+ch_clip <- mask(ch_rdnbr, ch_32610)
+```
+
+```{r}
+plot(tw_clip)
+```
+
+```{r}
+plot(en_clip)
+```
+
+```{r}
+plot(ch_clip)
+```
+
+# Raster to point
+```{r}
+tw_pt = rasterToPoints(tw_clip, fun=NULL, spatial=TRUE)
+tw_pt
+```
+
+```{r}
+en_pt = rasterToPoints(en_clip, fun=NULL, spatial=TRUE)
+en_pt
+```
+
+```{r}
+ch_pt = rasterToPoints(ch_clip, fun=NULL, spatial=TRUE)
+ch_pt
+```
+
+## Convert to sf object
+```{r}
+tw_pt_sf = st_as_sf(tw_pt)
+tw_pt_sf
+```
+
+```{r}
+en_pt_sf = st_as_sf(en_pt)
+en_pt_sf
+```
+
+```{r}
+ch_pt_sf = st_as_sf(ch_pt)
+ch_pt_sf
+```
+
+## Write  to Shapefile
+```{r eval=FALSE, include=FALSE}
+st_write(tw_pt_sf, "../outputs/RastertoPoint/TwRdnbrPoint.shp", driver="ESRI Shapefile") 
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(en_pt_sf, "../outputs/RastertoPoint/EnRdnbrPoint.shp", driver="ESRI Shapefile") 
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(ch_pt_sf, "../outputs/RastertoPoint/ChRdnbrPoint.shp", driver="ESRI Shapefile") 
+```
