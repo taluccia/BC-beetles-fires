@@ -110,7 +110,7 @@ head(data_full)
 
 ```{r}
 set.seed(15) # Set random seed
-brt.model1 <- gbm.step(data=data-full,
+brt.model1 <- gbm.step(data=data_full,
     gbm.x = c(1,2,3,4), 
     gbm.y = 5,
     family = "bernoulli",
