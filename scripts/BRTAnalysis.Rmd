@@ -57,7 +57,7 @@ source("../function/brt.functions.R")
 
 # Data
 ```{r}
-model.data = read.csv("../data/TrainingData/TrainData.csv", header=TRUE, sep = ",", strip.white = TRUE)
+model.data = read.csv("../data/TrainingData/TrainData1.csv", header=TRUE, sep = ",", strip.white = TRUE)
 ```
 
 ```{r}
@@ -133,11 +133,11 @@ summary(brt.model1,
 ### Save model outputs as external object for mapping later or posterity
 
 ```{r}
-save(brt.model1, file = "../outputs/BRTmodels/BRT1_model.rda")
+save(brt.model1, file = "../outputs/BRTmodels1/BRT1_model.rda")
 ```
 
 ```{r eval=FALSE, include=FALSE}
-load(file = "../outputs/BRTmodels/BRT1_model.rda")
+load(file = "../outputs/BRTmodels1/BRT1_model.rda")
 ```
 
 ### Relative influence of predictors as part of summary gbm - for model assessment
@@ -150,12 +150,12 @@ Notes: permutation.test.gbm(brt.model, n.trees=brt.model$n.trees); This method r
 ### Plotting (Anna Added)
 ```{r}
 gbm.plot(brt.model1, smooth=TRUE, write.title = TRUE, y.label="Fitted function", x.label="")
-dev.print(pdf, "../outputs/BRTmodels/BRT1_plots.pdf")
+dev.print(pdf, "../outputs/BRTmodels1/BRT1_plots.pdf")
 dev.off()
 ```
 ```{r}
 gbm.plot.fits(brt.model1)
-dev.print(pdf, "../outputs/BRTmodels/BRT1_fits.pdf")
+dev.print(pdf, "../outputs/BRTmodels1/BRT1_fits.pdf")
 dev.off()
 ```
 
@@ -182,9 +182,9 @@ cv.discrim.mean=round(brt.model1$cv.statistics$discrimination.mean,2)
 
 ```{r}
 BRT.model1.sum=data.frame(tot.n, y.perc, brt.model1$n.trees, perc.dev.expl, roc.mean, cv.dev.mean, cv.cor.mean, cv.discrim.mean)
-write.csv(BRT.model1.sum, '../outputs/BRTmodels/BRT1_sum.csv', row.names = F)
+write.csv(BRT.model1.sum, '../outputs/BRTmodels1/BRT1_sum.csv', row.names = F)
 BRT.model1.relinf=data.frame(rel.inf, vnames)
-write.csv(BRT.model1.relinf, '../outputs/BRTmodels/BRT1_relinf.csv', row.names = F)
+write.csv(BRT.model1.relinf, '../outputs/BRTmodels1/BRT1_relinf.csv', row.names = F)
 ```
 
 ```{r}
@@ -239,11 +239,11 @@ summary(brt.model2,
 ### Save model outputs as external object for mapping later or posterity
 
 ```{r}
-save(brt.model2, file = "../outputs/BRTmodels/BRT2_model.rda")
+save(brt.model2, file = "../outputs/BRTmodels1/BRT2_model.rda")
 ```
 
 ```{r eval=FALSE, include=FALSE}
-load(file = "../outputs/BRTmodels/BRT2_model.rda")
+load(file = "../outputs/BRTmodels1/BRT2_model.rda")
 ```
 
 ### Relative influence of predictors as part of summary gbm - for model assessment
@@ -256,12 +256,12 @@ Notes: permutation.test.gbm(brt.model, n.trees=brt.model$n.trees); This method r
 ### Plotting (Anna Added)
 ```{r}
 gbm.plot(brt.model2, smooth=TRUE, write.title = FALSE)
-dev.print(pdf, "../outputs/BRTmodels/BRT2_plots.pdf")
+dev.print(pdf, "../outputs/BRTmodels1/BRT2_plots.pdf")
 dev.off()
 ```
 ```{r}
 gbm.plot.fits(brt.model2)
-dev.print(pdf, "../outputs/BRTmodels/BRT2_fits.pdf")
+dev.print(pdf, "../outputs/BRTmodels1/BRT2_fits.pdf")
 dev.off()
 ```
 
@@ -288,9 +288,9 @@ cv.discrim.mean=round(brt.model2$cv.statistics$discrimination.mean,2)
 
 ```{r}
 BRT.model2.sum=data.frame(tot.n, y.perc, brt.model2$n.trees, perc.dev.expl, roc.mean, cv.dev.mean, cv.cor.mean, cv.discrim.mean)
-write.csv(BRT.model2.sum, '../outputs/BRTmodels/BRT2_sum.csv', row.names = F)
+write.csv(BRT.model2.sum, '../outputs/BRTmodels1/BRT2_sum.csv', row.names = F)
 BRT.model2.relinf=data.frame(rel.inf, vnames)
-write.csv(BRT.model2.relinf, '../outputs/BRTmodels/BRT2_relinf.csv', row.names = F)
+write.csv(BRT.model2.relinf, '../outputs/BRTmodels1/BRT2_relinf.csv', row.names = F)
 ```
 
 ```{r}
@@ -331,11 +331,11 @@ summary(brt.model3,
 ### Save model outputs as external object for mapping later or posterity
 
 ```{r}
-save(brt.model3, file = "../outputs/BRTmodels/BRT3_model.rda")
+save(brt.model3, file = "../outputs/BRTmodels1/BRT3_model.rda")
 ```
 
 ```{r eval=FALSE, include=FALSE}
-load(file = "../outputs/BRTmodels/BRT3_model.rda")
+load(file = "../outputs/BRTmodels1/BRT3_model.rda")
 ```
 
 ### Relative influence of predictors as part of summary gbm - for model assessment
@@ -348,12 +348,12 @@ Notes: permutation.test.gbm(brt.model, n.trees=brt.model$n.trees); This method r
 ### Plotting (Anna Added)
 ```{r}
 gbm.plot(brt.model3, smooth=TRUE, write.title = FALSE)
-dev.print(pdf, "../outputs/BRTmodels/BRT3_plots.pdf")
+dev.print(pdf, "../outputs/BRTmodels1/BRT3_plots.pdf")
 dev.off()
 ```
 ```{r}
 gbm.plot.fits(brt.model3)
-dev.print(pdf, "../outputs/BRTmodels/BRT3_fits.pdf")
+dev.print(pdf, "../outputs/BRTmodels1/BRT3_fits.pdf")
 dev.off()
 ```
 
@@ -380,9 +380,9 @@ cv.discrim.mean=round(brt.model3$cv.statistics$discrimination.mean,2)
 
 ```{r}
 BRT.model3.sum=data.frame(tot.n, y.perc, brt.model3$n.trees, perc.dev.expl, roc.mean, cv.dev.mean, cv.cor.mean, cv.discrim.mean)
-write.csv(BRT.model3.sum, '../outputs/BRTmodels/BRT3_sum.csv', row.names = F)
+write.csv(BRT.model3.sum, '../outputs/BRTmodels1/BRT3_sum.csv', row.names = F)
 BRT.model3.relinf=data.frame(rel.inf, vnames)
-write.csv(BRT.model3.relinf, '../outputs/BRTmodels/BRT3_relinf.csv', row.names = F)
+write.csv(BRT.model3.relinf, '../outputs/BRTmodels1/BRT3_relinf.csv', row.names = F)
 ```
 
 ```{r}
