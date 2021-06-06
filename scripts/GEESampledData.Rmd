@@ -224,7 +224,13 @@ df2
 # Create Training Data
 ## Randomly sample 60%  of data
 
-
+```{r}
+set.seed(15)
+train.data1 = df2 %>% 
+  group_by(fwi_lohi, rdnbr_class) %>%
+  sample_frac(0.6)
+train.data1
+```
 
 ```{r}
 set.seed(101)
@@ -235,8 +241,20 @@ train.data
 ```{r}
 summary(train.data)
 ```
+
+
+```{r}
+summary(train.data1)
+```
+
+
 ```{r}
 train.data %>% 
+  count(rdnbr_class) 
+```
+
+```{r}
+train.data1 %>% 
   count(rdnbr_class) 
 ```
 
@@ -253,12 +271,13 @@ train.data %>%
 ```
 
 
-```{r}
-
-  write.csv(train.data, '../outputs/TrainingData/TrainData.csv', row.names = FALSE)
+```{r eval=FALSE, include=FALSE}
+write.csv(train.data, '../outputs/TrainingData/TrainData.csv', row.names = FALSE)
 ```
 
-
+```{r eval=FALSE, include=FALSE}
+write.csv(train.data1, '../outputs/TrainingData/TrainData1.csv', row.names = FALSE)
+```
 
 
 
