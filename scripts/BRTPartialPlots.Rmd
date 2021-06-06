@@ -1,0 +1,330 @@
+---
+title: "Partial Plots"
+author: "Anna Talucci"
+date: "6/5/2021"
+output: html_document
+---
+
+---
+title: "Partial Plots Subset data"
+author: "Anna Talucci"
+date: "September 20, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+Script adapted from Areil Muldoon and Garrett Meigs
+
+September 2019: Extra fun with partial plots.  This script is designed to use brt model runs saved as .Rdas.
+
+Data from BRTAnalysis-SubsetData
+
+# Goal: Overlay partial-dependence plots from multiple models.
+
+NOte: the y-axis of the BRT model are referred to as the fitted function, for a binomial distribtuion this fitted function is the loggit scale. To convert back to a probability we can use the plogis() function. We will leave the y-axix on the logit scale but also add a line for a high probability
+
+setwd("K:/Papers/Meigs_Refugia2_LateSuccessionalForests/r_files_brt")   ### Change to wherever you put the code files sourced below
+
+# Load packages
+```{r message=FALSE, warning=FALSE}
+library(gbm)
+library(dismo)
+library(purrr) # for looping
+library(ggplot2)
+library(scales)
+library(dplyr) # for data manip
+library(cowplot)
+```
+
+# BRT Models
+
+Model         | Name        | FWI        | Variables
+------------- | ----------- | ---------- | -------------------------------------------
+brt.model1    | Full        | Full Range | Prefire, outbreak, weather, topography
+brt.model2    | Hi          | Hi  only   | Prefire, outbreak, weather, topography
+
+brt.model6    | Lo          | Lo only    | Prefire, outbreak, weather, topography
+
+
+
+
+
+# Load BRT Models 
+Load BRT models that are saved during the model as .Rda files in the working directory. Models are assembled and run in the script 'BRTAnalyses'
+```{r}
+load(file = "../outputs/BRTmodels1/BRT1_model.rda")
+brt.model1 = brt.model1
+
+load(file = "../outputs/BRTmodels1/BRT2_model.rda")
+brt.model2 = brt.model2
+
+load(file = "../outputs/BRTmodels1/BRT3_model.rda")
+brt.model3 = brt.model3
+```
+
+# Data
+
+```{r}
+data = read.csv("../data/TrainingData/TrainData.csv") 
+```
+
+```{r}
+head(data)
+```
+
+# Manuscript figure
+
+## Group 1 models 
+Make list of models and variables
+mods4 = list(Hi_4var = brt.model1, Mod_4var = brt.model2, Full_4var = brt.model6)
+vars4 = c("dndmi", "elevation", "fwi", "ndviprefire")
+names(vars4) = vars4
+vars4
+```{r}
+mods4 = list(full_mod= brt.model1, hi_mod = brt.model2, lo_mod = brt.model3)
+vars4 = c("dndmi", "elevation", "fwi", "ndviprefire")
+names(vars4) = vars4
+vars4
+```
+
+Nicer variable names for x axis labels Must be in same order as vars
+```{r}
+x_names4 = c("dNDMI", "Elevation (m)", "FWI", "NDVI")
+```
+
+### Predicted dataset 
+Use nested loops for each variable and then each model within each variable
+
+ For outer loop use map() or lapply()
+ For the inner loop use imap_dfr() to use models and model names and bind together
+
+ Work out approach with a single variable
+ Goal is to get a dataset with predictions from all models stacked together for one x variable
+
+### Loop through single varible
+```{r}
+pred_test4 = map(vars4[[1]], function(variable) {
+     imap_dfr(mods4, function(Model, mod.name) {
+          preddat = plot.gbm(Model, i.var = variable, return.grid = TRUE)
+          preddat$center_y = scale(preddat$y, scale = FALSE)
+          preddat$x = preddat[, 1]
+          preddat$Model = mod.name
+          preddat
+     })
+})
+
+pred_test4
+```
+
+### Loop through all Varaibles 
+If that worked, loop through all variables
+```{r}
+pred_mods4 = map(vars4, function(variable) {
+     imap_dfr(mods4, function(model, mod.name) {
+          preddat = plot.gbm(model, i.var = variable, return.grid = TRUE)
+          preddat$center_y = scale(preddat$y, scale = FALSE)
+          preddat$x = preddat[, 1]
+          preddat$model = mod.name
+          preddat
+     })
+})
+```
+
+Figure out plot limits (if want all the same) by binding all groups together and calculating min and max center_y
+```{r}
+range(bind_rows(pred_mods4)$center_y)
+```
+
+### Plot with improved x axis names ----
+```{r}
+model_id <- ggplot(data = pred_mods4[[1]], aes(x = x, y = center_y, linetype = model, color = model) ) +
+        geom_smooth(span = 0.5, se = FALSE) + # choose span? 
+        scale_color_manual(values = c("blue","red", "orange"), name = "Fire weather", guide = guide_legend(reverse=TRUE)) +
+        scale_linetype_manual(values = c("solid", "longdash", "twodash"), name = "Fire weather", guide = guide_legend(reverse=TRUE)) +
+        labs(x = x_names4[[1]]) +
+        theme_bw(base_size = 12) +
+        theme(axis.text.x = element_text(size = 10, color = "black"),
+              axis.text.y = element_text(size = 10, color = "black"),
+              panel.border = element_rect(color = "black", size = 1.25),
+              panel.grid.major = element_line(color = 'white', linetype = 'dashed'), panel.grid.minor = element_blank(),
+              legend.position = "bottom",
+              legend.title = element_text(size = 14),
+              legend.text = element_text(size = 14)) +
+        scale_x_continuous(labels = scales::format_format(scientific = FALSE)) +
+        #scale_x_continuous(labels = comma) +
+        #ylim(-1.55, 1.55) +
+        geom_hline(yintercept=0)+
+        scale_y_continuous(limits=c(-2.2,2.2), breaks=c(-2.197225,-0.8472979, 0, 0.8472979, 2.197225), labels = c("0.1", "0.3", "0.5", "0.7", "0.9"), name="Probability")
+
+model_id
+```
+Leaving legend to indicate multiple models plotted.
+
+## Add bar plot?
+ggplot(model.data, aes(x=beetle_change)) + geom_histogram(color="black", fill="white") +
+```{r}
+ggplot() +
+  geom_histogram(data = data, aes(x=dndmi), fill="#003f5c", alpha=0.4)
+```
+```{r}
+ggplot() +
+  geom_histogram(data = data, aes(x=dndmi), fill="#003f5c", alpha=0.4) +
+  geom_smooth(data = pred_mods4[[1]], aes(x = x, y = center_y, linetype = model, color = model), span = 0.5, se = FALSE) + # choose span? 
+        scale_color_manual(values = c("blue","red", "orange"), name = "Fire weather", guide = guide_legend(reverse=TRUE)) +
+        scale_linetype_manual(values = c("solid", "longdash", "twodash"), name = "Fire weather", guide = guide_legend(reverse=TRUE)) +
+        labs(x = x_names4[[1]]) +
+        theme_bw(base_size = 12) +
+        theme(axis.text.x = element_text(size = 10, color = "black"),
+              axis.text.y = element_text(size = 10, color = "black"),
+              panel.border = element_rect(color = "black", size = 1.25),
+              panel.grid.major = element_line(color = 'white', linetype = 'dashed'), panel.grid.minor = element_blank(),
+              legend.position = "bottom",
+              legend.title = element_text(size = 14),
+              legend.text = element_text(size = 14)) +
+        scale_x_continuous(labels = scales::format_format(scientific = FALSE)) +
+        #scale_x_continuous(labels = comma) +
+        #ylim(-1.55, 1.55) +
+        scale_y_continuous(limits=c(-2.2,2.2), breaks=c(-2.197225,-0.8472979, 0, 0.8472979, 2.197225), labels = c("0.1", "0.3", "0.5", "0.7", "0.9"), name="Probability",  sec.axis = sec_axis(trans = ~.*0.0001, name="Counts"))
+
+ 
+
+```
+### Figure Legend
+```{r}
+BC_leg = ggplot(data = pred_mods4[[1]], aes(x = x, y = center_y, linetype = model, color = model) ) +
+        geom_smooth(span = 0.5, se = FALSE) + # choose span? 
+        scale_color_manual(values = c("blue","red", "orange"), name = "Burning conditions", labels=c("Full", "Extreme", "Moderate"), guide = guide_legend(reverse=FALSE)) +
+        scale_linetype_manual(values = c("solid", "longdash", "twodash"), name = "Burning conditions", labels=c("Full", "Extreme", "Moderate"), guide = guide_legend(reverse=FALSE)) +
+        labs(y = "Fitted Function",
+             x = x_names4[[1]]) +
+        theme_bw(base_size = 12) +
+        theme(axis.text.x = element_text(size = 10, color = "black"),
+              axis.text.y = element_text(size = 10, color = "black"),
+              panel.border = element_rect(color = "black", size = 1.25),
+              panel.grid.major = element_line(color = 'white', linetype = 'dashed'), panel.grid.minor = element_blank(),
+              legend.position = "right",
+              legend.title = element_text(size = 14),
+              legend.text = element_text(size = 14)) +
+        scale_x_continuous(labels = scales::format_format(scientific = FALSE)) +
+        #scale_x_continuous(labels = comma) +
+        #ylim(-1.55, 1.55) +
+        geom_hline(yintercept=0)+
+        scale_y_continuous(limits=c(-2.2,2.2), breaks=c(-2.197225,-0.8472979, 0, 0.8472979, 2.197225), labels = c("0.1", "0.3", "0.5", "0.7", "0.9"), name="Probability")
+
+BC_leg
+```
+
+### Figure Legend
+```{r}
+legBottom = ggplot(data = pred_mods4[[1]], aes(x = x, y = center_y, linetype = model, color = model) ) +
+        geom_smooth(span = 0.5, se = FALSE) + # choose span? 
+        scale_color_manual(values = c("blue","red", "orange"), name = "Burning conditions", labels=c("Full", "Extreme", "Moderate"), guide = guide_legend(reverse=FALSE)) +
+        scale_linetype_manual(values = c("solid", "longdash", "twodash"), name = "Burning conditions", labels=c("Full", "Extreme", "Moderate"), guide = guide_legend(reverse=FALSE)) +
+        labs(y = "Fitted Function",
+             x = x_names4[[1]]) +
+        theme_bw(base_size = 12) +
+        theme(axis.text.x = element_text(size = 10, color = "black"),
+              axis.text.y = element_text(size = 10, color = "black"),
+              panel.border = element_rect(color = "black", size = 1.25),
+              panel.grid.major = element_line(color = 'white', linetype = 'dashed'), panel.grid.minor = element_blank(),
+              legend.position = "bottom",
+              legend.title = element_text(size = 10),
+              legend.text = element_text(size = 10)) +
+  theme(legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.2, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)))  + 
+  guides(fill = guide_legend( ncol=1), 
+         shape = guide_legend(override.aes = list(size = 0.4)), 
+         color = guide_legend(override.aes = list(size = 0.4))) + 
+        scale_x_continuous(labels = scales::format_format(scientific = FALSE)) +
+        #scale_x_continuous(labels = comma) +
+        #ylim(-1.55, 1.55) +
+        geom_hline(yintercept=0)+
+        scale_y_continuous(limits=c(-2.2,2.2), breaks=c(-2.197225,-0.8472979, 0, 0.8472979, 2.197225), labels = c("0.1", "0.3", "0.5", "0.7", "0.9"), name="Probability")
+
+legBottom
+```
+### Plotting function ----
+Note: plot.margin - t,r,b,l
+
+Adjust plot margins for compiling a panel figure with cowplot.
+
+```{r}
+pardep_plot_mods4 = function(data, x_var) {
+     ggplot(data = data, aes(x = x, y = center_y, linetype = model, color = model) ) +
+                geom_smooth(span = 0.5, se = FALSE) + # choose span? 
+                scale_color_manual(values = c("blue","red", "orange")) +
+                labs(x = x_var) +
+                theme_bw(base_size = 12) +
+                theme(plot.margin = unit(c(0.05, 0.2, 0.05, 0.5), "cm")) +
+                theme(axis.text.x = element_text(size = 10, color = "black"),
+                      axis.text.y = element_text(size = 10, color = "black"),
+                      panel.border = element_rect(color = "black", size = 1.25),
+                      panel.grid.major = element_line(color = 'white', linetype = 'dashed'), panel.grid.minor = element_blank(),
+                      legend.position = "none") +
+                scale_x_continuous(labels = scales::format_format(scientific = FALSE)) +
+                #scale_x_continuous(labels = comma) +
+                #ylim(-1.55, 1.55) +
+                geom_hline(yintercept=0)+
+                scale_y_continuous(limits=c(-2.2,2.2), breaks=c(-2.197225,-0.8472979, 0, 0.8472979, 2.197225), labels = c("0.1", "0.3", "0.5", "0.7", "0.9"), name="Probability")
+}
+
+pardep_plot_mods4(data = pred_mods4[[1]], x_var = x_names4[[1]])
+```
+
+### Loop through the models and the x variable names
+    simultaneously with map2()
+```{r}
+all_mod_plots4 = map2(pred_mods4, x_names4, pardep_plot_mods4)
+all_mod_plots4
+```
+
+
+
+
+## Manuscript Figure
+
+
+```{r}
+legend_bottom <- get_legend(legBottom) 
+```
+Order plots
+-- FWI
+-- Elevation
+-- NDVI
+-- dNDMI
+
+
+```{r fig.height=5, fig.width=6}
+msplot1 = cowplot::plot_grid( all_mod_plots4$ndviprefire, all_mod_plots4$fwi, all_mod_plots4$elevation, all_mod_plots4$dndmi, ncol = 2) +
+    draw_label("dead/\nsparse", x = .22, y = .63, size = 9) +
+    draw_label("live/\ndense", x = .42, y = .63, size = 9) +
+    draw_label("moderate", x = .75, y = .62, size = 9) +
+   draw_label("extreme", x = .9, y = .62, size = 9) +
+      draw_label("low", x = .2, y = .12, size = 9) +
+   draw_label("high", x = .4, y = .12, size = 9) +
+   draw_label("no\nmortality", x = .7, y = .14, size = 9) +
+   draw_label("high\nmortality", x = .9, y = .14, size = 9) +
+   draw_label("(a)", x = .14, y = .97, size = 10) +
+   draw_label("(b)", x = .64, y = .97, size = 10) +
+   draw_label("(c)", x = .14, y = .47, size = 10) +
+   draw_label("(d)", x = .64, y = .47, size = 10) 
+
+msplot1
+```
+
+```{r fig.height=5.25, fig.width=6}
+grid_msplot = cowplot::plot_grid(msplot1, legend_bottom, ncol=1, rel_heights = c(1, .1))
+
+grid_msplot
+```
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/PartialPlot.tiff", plot = grid_msplot, width = 6, height =5.25, units = c("in"), dpi=600 )
+```
+**THE END**
