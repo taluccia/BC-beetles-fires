@@ -33,15 +33,15 @@ ch_rdnbr = raster("../data/rdnbr_epsg_32610/CH_rdnbr.tif")
 
 ## Fire perimeters 
 ```{r}
-tw_perm = st_read("../data/perimeters/TweedsTreed.shp", "TweedsTreed") 
+tw_perm = st_read("../data/perimeters/TweedsTreed-100.shp", "TweedsTreed") 
 ```
 
 ```{r}
-en_perm = st_read("../data/perimeters/EntiakoTreed.shp", "EntiakoTreed") 
+en_perm = st_read("../data/perimeters/EntiakoTreed-100.shp", "EntiakoTreed") 
 ```
 
 ```{r}
-ch_perm = st_read("../data/perimeters/ChelaslieTreed.shp", "ChelaslieTreed") 
+ch_perm = st_read("../data/perimeters/ChelaslieTreed-100.shp", "ChelaslieTreed") 
 ```
 
 # Projection & Resolution
@@ -75,7 +75,7 @@ st_crs(en_perm)
 st_crs(ch_perm)
 ```
 
-## Transform perieters to Landsat Imagery  projection
+## Transform perimeters to Landsat Imagery  projection
 ```{r}
 tw_32610 = st_transform(tw_perm, crs=landsat_proj)
 
@@ -123,6 +123,8 @@ tw_pt = rasterToPoints(tw_clip, fun=NULL, spatial=TRUE)
 tw_pt
 ```
 
+
+
 ```{r}
 en_pt = rasterToPoints(en_clip, fun=NULL, spatial=TRUE)
 en_pt
@@ -161,3 +163,21 @@ st_write(en_pt_sf, "../outputs/RastertoPoint/EnRdnbrPoint.shp", driver="ESRI Sha
 ```{r eval=FALSE, include=FALSE}
 st_write(ch_pt_sf, "../outputs/RastertoPoint/ChRdnbrPoint.shp", driver="ESRI Shapefile") 
 ```
+
+
+# Select first 5 rows of TW
+
+```{r}
+tw_test = tw_pt_sf %>% slice(1:5)
+
+tw_test
+
+```
+
+
+
+```{r eval=FALSE, include=FALSE}
+st_write(tw_test, "../outputs/RastertoPoint/TwTest.shp", driver="ESRI Shapefile") 
+```
+
+
