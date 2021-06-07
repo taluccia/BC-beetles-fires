@@ -1,0 +1,102 @@
+---
+title: "USample Points"
+author: "Anna Talucci"
+date: "6/5/2021"
+output: html_document
+---
+
+# Overview
+Samples a 5% of all points created from raster that  will be used in GEE to extract data
+
+## Library
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
+```
+
+
+# Data
+
+## Fires
+```{r}
+en = st_read("../data/RastertoPoint/EnRdnbrPoint.shp", "EnRdnbrPoint") 
+
+tw = st_read("../data/RastertoPoint/TwRdnbrPoint.shp", "TwRdnbrPoint") 
+
+ch = st_read("../data/RastertoPoint/ChRdnbrPoint.shp", "ChRdnbrPoint") 
+```
+
+
+```{r}
+head(en)
+```
+
+```{r}
+head(tw)
+```
+
+```{r}
+head(ch)
+```
+
+# Sampling
+
+## En
+```{r}
+set.seed(101)
+en_data = en %>% sample_frac(0.05)
+en_data
+```
+
+
+```{r}
+ggplot(en_data, aes(x=EN_rdnbr)) + geom_histogram() 
+```
+
+
+## TW
+```{r}
+set.seed(101)
+tw_data = tw %>% sample_frac(0.05)
+tw_data
+```
+
+
+```{r}
+ggplot(tw_data, aes(x=TW_rdnbr)) + geom_histogram() 
+```
+
+## CH
+```{r}
+set.seed(101)
+ch_data = ch %>% sample_frac(0.05)
+ch_data
+```
+
+
+```{r}
+ggplot(ch_data, aes(x=CH_rdnbr)) + geom_histogram() 
+```
+
+
+
+## Write  to Shapefile
+```{r eval=FALSE, include=FALSE}
+st_write(tw_data, "../outputs/SamplePointRdNBR/TwSamplePt.shp", driver="ESRI Shapefile") 
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(en_data, "../outputs/SamplePointRdNBR/EnSamplePt.shp", driver="ESRI Shapefile") 
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(ch_data, "../outputs/SamplePointRdNBR/ChSamplePt.shp", driver="ESRI Shapefile") 
+```
