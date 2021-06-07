@@ -122,10 +122,22 @@ fire1
 plot(st_geometry(fire1))
 
 ```
+#### Negative buffer
+```{r}
+fire1.1 = st_buffer(fire1, dist=-100, endCapStyle = "ROUND",
+  joinStyle = "ROUND",)
+```
+
+```{r}
+plot(st_geometry(fire1))
+plot(st_geometry(fire1.1), add=TRUE)
+```
 
 ```{r}
 nonveg1 = vri1 %>% filter(BCLCS_LE_1!="T" | BCLCS_LEVE=="N")
 ```
+
+
 ```{r}
 plot(st_geometry(fire1))
 plot(st_geometry(nonveg1), add=TRUE)
@@ -141,8 +153,14 @@ st_is_valid(nonveg1)
 ```{r}
 st_is_valid(fire1)
 ```
+
 ```{r}
 diff1 = st_difference(st_make_valid(fire1), st_make_valid(st_combine(nonveg1)))
+```
+
+
+```{r}
+diff1.1 = st_difference(st_make_valid(fire1.1), st_make_valid(st_combine(nonveg1)))
 ```
 
 
@@ -153,6 +171,10 @@ plot(st_geometry(diff1), col="blue")
 
 ```{r eval=FALSE, include=FALSE}
 st_write(diff1, "../outputs/perimeters/EntiakoTreed.shp", driver="ESRI Shapefile") 
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(diff1.1, "../outputs/perimeters/EntiakoTreed-100.shp", driver="ESRI Shapefile") 
 ```
 
 ## R10252    | Tweedsmuir  | 2013
@@ -174,6 +196,17 @@ plot(st_geometry(fire2))
 st_write(fire2, "../outputs/perimeters/R10070.shp", driver="ESRI Shapefile") 
 ```
 
+#### Negative buffer
+```{r}
+fire2.1 = st_buffer(fire2, dist=-100, endCapStyle = "ROUND",
+  joinStyle = "ROUND",)
+```
+
+```{r}
+plot(st_geometry(fire2))
+plot(st_geometry(fire2.1), add=TRUE)
+```
+
 ### Filter VRI
 ```{r}
 nonveg2 = vri2 %>% filter(BCLCS_LE_1!="T" | BCLCS_LEVE=="N")
@@ -189,6 +222,9 @@ plot(st_geometry(nonveg2), add=TRUE)
 diff2 = st_difference(st_make_valid(fire2), st_make_valid(st_combine(nonveg2)))
 ```
 
+```{r}
+diff2.1 = st_difference(st_make_valid(fire2.1), st_make_valid(st_combine(nonveg2)))
+```
 
 
 ```{r}
@@ -196,6 +232,10 @@ plot(st_geometry(diff2), col="blue")
 ```
 ```{r eval=FALSE, include=FALSE}
 st_write(diff2, "../outputs/perimeters/TweedsTreed.shp", driver="ESRI Shapefile") 
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(diff2.1, "../outputs/perimeters/TweedsTreed-100.shp", driver="ESRI Shapefile") 
 ```
 
 ## R10070    | Chelaslie  | 2014
@@ -218,6 +258,17 @@ plot(st_geometry(fire3))
 st_write(fire3, "../outputs/perimeters/R10252.shp", driver="ESRI Shapefile") 
 ```
 
+#### Negative buffer
+```{r}
+fire3.1 = st_buffer(fire3, dist=-100, endCapStyle = "ROUND",
+  joinStyle = "ROUND",)
+```
+
+```{r}
+plot(st_geometry(fire3))
+plot(st_geometry(fire3.1), add=TRUE)
+```
+
 ### Filter VRI
 ```{r}
 nonveg3 = vri3 %>% filter(BCLCS_LE_1!="T" | BCLCS_LEVE=="N")
@@ -234,7 +285,9 @@ plot(st_geometry(nonveg3), add=TRUE)
 diff3 = st_difference(st_make_valid(fire3), st_make_valid(st_combine(nonveg3)))
 ```
 
-
+```{r}
+diff3.1 = st_difference(st_make_valid(fire3.1), st_make_valid(st_combine(nonveg3)))
+```
 
 ```{r}
 plot(st_geometry(diff3), col="blue")
@@ -244,7 +297,9 @@ plot(st_geometry(diff3), col="blue")
 st_write(diff3, "../outputs/perimeters/ChelaslieTreed.shp", driver="ESRI Shapefile") 
 ```
 
-
+```{r eval=FALSE, include=FALSE}
+st_write(diff3.1, "../outputs/perimeters/ChelaslieTreed-100.shp", driver="ESRI Shapefile") 
+```
 
 
 
