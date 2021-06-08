@@ -5,6 +5,12 @@ date: "6/5/2021"
 output: html_document
 ---
 
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
 # Overview
 Samples a 5% of all points created from raster that  will be used in GEE to extract data
 
@@ -27,11 +33,11 @@ library(lubridate)
 
 ## Fires
 ```{r}
-en = st_read("../data/RastertoPoint/EnRdnbrPoint.shp", "EnRdnbrPoint") 
+en = st_read("../data/1.2-RastertoPoint/EnRdnbrPoint.shp", "EnRdnbrPoint") 
 
-tw = st_read("../data/RastertoPoint/TwRdnbrPoint.shp", "TwRdnbrPoint") 
+tw = st_read("../data/1.2-RastertoPoint/TwRdnbrPoint.shp", "TwRdnbrPoint") 
 
-ch = st_read("../data/RastertoPoint/ChRdnbrPoint.shp", "ChRdnbrPoint") 
+ch = st_read("../data/1.2-RastertoPoint/ChRdnbrPoint.shp", "ChRdnbrPoint") 
 ```
 
 
@@ -90,13 +96,13 @@ ggplot(ch_data, aes(x=CH_rdnbr)) + geom_histogram()
 
 ## Write  to Shapefile
 ```{r eval=FALSE, include=FALSE}
-st_write(tw_data, "../outputs/SamplePointRdNBR/TwSamplePt.shp", driver="ESRI Shapefile") 
+st_write(tw_data, "../outputs/1.3-SamplePointRdNBR/TwSamplePt.shp", driver="ESRI Shapefile") 
 ```
 
 ```{r eval=FALSE, include=FALSE}
-st_write(en_data, "../outputs/SamplePointRdNBR/EnSamplePt.shp", driver="ESRI Shapefile") 
+st_write(en_data, "../outputs/1.3-SamplePointRdNBR/EnSamplePt.shp", driver="ESRI Shapefile") 
 ```
 
 ```{r eval=FALSE, include=FALSE}
-st_write(ch_data, "../outputs/SamplePointRdNBR/ChSamplePt.shp", driver="ESRI Shapefile") 
+st_write(ch_data, "../outputs/1.3-SamplePointRdNBR/ChSamplePt.shp", driver="ESRI Shapefile") 
 ```

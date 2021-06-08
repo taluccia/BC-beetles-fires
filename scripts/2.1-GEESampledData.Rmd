@@ -5,8 +5,10 @@ date: "6/5/2021"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
 ```
 
 
@@ -23,9 +25,9 @@ library(ggplot2)
 
 # Data
 ```{r}
-endata = read.csv("../data/GEE-Sampled/2021-06-06_EnSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
-twdata = read.csv("../data/GEE-Sampled/2021-06-06_TWSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
-chdata = read.csv("../data/GEE-Sampled/2021-06-06_ChSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
+endata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_EnSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
+twdata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_TWSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
+chdata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_ChSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
 ```
 
 
@@ -212,6 +214,8 @@ df1
 
 # Add variables
 
+If the pixel burned as high severity, it’s a 1 (present); if thepixel burned as other it was absent, it’s a 0.
+
 ```{r}
 df2 = df1 %>%
   mutate(fwi_lohi = ifelse(fwi<= 29, 1, 2)) %>%
@@ -225,19 +229,20 @@ df2
 # Create Training Data
 ## Randomly sample 60%  of data
 
+
+
 ```{r}
 set.seed(15)
 train.data = df2 %>% 
-  group_by(fwi_lohi, rdnbr_class, FireYr) %>%
+  group_by(fwi_lohi, rdnbr_class) %>%
   sample_frac(0.6)
 train.data
 ```
 
-
-
 ```{r}
 summary(train.data)
 ```
+
 
 
 
@@ -274,12 +279,58 @@ write.csv(train.data, '../outputs/TrainingData/TrainData.csv', row.names = FALSE
 
 
 
+# Hitograms of trainning data
+
+
+
+```{r}
+h1 = ggplot(train.data, aes(x=ndviprefire)) + geom_histogram(color="black", fill="white") +
+  xlab("NDVI") +
+  theme_bw()
+```
+
+```{r}
+h2 = ggplot(train.data, aes(x=fwi)) + geom_histogram(color="black", fill="white") +
+  xlab("FWI") +
+  theme_bw()
+```
+
+
+
+```{r}
+h3 = ggplot(train.data, aes(x=elevation)) + geom_histogram(color="black", fill="white") +
+  xlab("Elevation (m)") +
+  theme_bw()
+```
+
+```{r}
+h4 = ggplot(train.data, aes(x=dndmi)) + geom_histogram(color="black", fill="white") +
+  xlab("dNDMI") +
+  theme_bw()
+```
 
 
 
 
 
+```{r}
+h5 = ggplot(train.data, aes(x=rdnbr)) + geom_histogram(color="black", fill="white") +
+  xlab("RdNBR") +
+  theme_bw()
+```
 
 
+```{r fig.height=7, fig.width=6}
+( grid2 = cowplot::plot_grid(h1, h2, h4, h3, h5, align = "hv", ncol= 2) +
+    
+   draw_label("(a)", x = .13, y = .97, size = 10) +
+   draw_label("(b)", x = .63, y = .97, size = 10) +
+   draw_label("(c)", x = .13, y = .64, size = 10) +
+   draw_label("(d)", x = .63, y = .64, size = 10) +
+    draw_label("(e)", x = .13, y = .31, size = 10))
+```
 
 
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/Histograms.png", plot = grid2, width = 6, height = 7, units = c("in"), dpi=600 )
+```

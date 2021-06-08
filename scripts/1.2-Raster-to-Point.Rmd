@@ -5,6 +5,13 @@ date: "6/5/2021"
 output: html_document
 ---
 
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
 # Packages
 
 ```{r include=FALSE}
@@ -19,29 +26,29 @@ library(foreign) # deals with dbf files
 # Data
 ## Rasters
 ```{r}
-tw_rdnbr = raster("../data/rdnbr_epsg_32610/TW_rdnbr.tif")
+tw_rdnbr = raster("../data/1.2-rdnbr_epsg_32610/TW_rdnbr.tif")
 ```
 
 ```{r}
-en_rdnbr = raster("../data/rdnbr_epsg_32610/EN_rdnbr.tif")
+en_rdnbr = raster("../data/1.2-rdnbr_epsg_32610/EN_rdnbr.tif")
 ```
 
 ```{r}
-ch_rdnbr = raster("../data/rdnbr_epsg_32610/CH_rdnbr.tif")
+ch_rdnbr = raster("../data/1.2-rdnbr_epsg_32610/CH_rdnbr.tif")
 ```
 
 
 ## Fire perimeters 
 ```{r}
-tw_perm = st_read("../data/perimeters/TweedsTreed-100.shp", "TweedsTreed") 
+tw_perm = st_read("../data/perimeters/TweedsTreed-100.shp", "TweedsTreed-100") 
 ```
 
 ```{r}
-en_perm = st_read("../data/perimeters/EntiakoTreed-100.shp", "EntiakoTreed") 
+en_perm = st_read("../data/perimeters/EntiakoTreed-100.shp", "EntiakoTreed-100") 
 ```
 
 ```{r}
-ch_perm = st_read("../data/perimeters/ChelaslieTreed-100.shp", "ChelaslieTreed") 
+ch_perm = st_read("../data/perimeters/ChelaslieTreed-100.shp", "ChelaslieTreed-100") 
 ```
 
 # Projection & Resolution

@@ -56,13 +56,13 @@ brt.model6    | Lo          | Lo only    | Prefire, outbreak, weather, topograph
 # Load BRT Models 
 Load BRT models that are saved during the model as .Rda files in the working directory. Models are assembled and run in the script 'BRTAnalyses'
 ```{r}
-load(file = "../outputs/BRTmodels1/BRT1_model.rda")
+load(file = "../outputs/BRTmodels/BRT1_model.rda")
 brt.model1 = brt.model1
 
-load(file = "../outputs/BRTmodels1/BRT2_model.rda")
+load(file = "../outputs/BRTmodels/BRT2_model.rda")
 brt.model2 = brt.model2
 
-load(file = "../outputs/BRTmodels1/BRT3_model.rda")
+load(file = "../outputs/BRTmodels/BRT3_model.rda")
 brt.model3 = brt.model3
 ```
 
@@ -78,7 +78,7 @@ head(data)
 
 # Manuscript figure
 
-## Group 1 models 
+## models 
 Make list of models and variables
 mods4 = list(Hi_4var = brt.model1, Mod_4var = brt.model2, Full_4var = brt.model6)
 vars4 = c("dndmi", "elevation", "fwi", "ndviprefire")
