@@ -1,0 +1,159 @@
+---
+title: "Daily Fire Weather"
+author: "Anna Talucci"
+date: "6/7/2021"
+output: html_document
+---
+
+
+
+```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(statmod)
+library(car)
+library(DHARMa)
+library(GGally)
+library(MASS)
+library(cowplot)
+library(magick)
+
+```
+
+# Data
+
+```{r}
+weather = read.csv("../data/weather/AllFires_dailyweather_R.csv", header=TRUE, sep = ",", strip.white = TRUE)
+head(weather)
+```
+
+
+```{r}
+fwi = ggplot(weather, aes(x=Fire_id, y=fwi, fill=Fire_id)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette="Dark2") +
+    ylab(label="FWI") + 
+  xlab("") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+rh = ggplot(weather, aes(x=Fire_id, y=rh, fill=Fire_id)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette="Dark2") +
+    ylab(label="Relative Humidity") + 
+  xlab("") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+temp = ggplot(weather, aes(x=Fire_id, y=temp, fill=Fire_id)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette="Dark2") +
+    ylab(expression(paste("Temp, ",degree,"C"))) + 
+  xlab("") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+ws = ggplot(weather, aes(x=Fire_id, y=ws, fill=Fire_id)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette="Dark2") +
+    ylab(label="Wind speed (m/s)") + 
+  xlab("") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+```
+
+
+```{r}
+burndate = ggplot(weather, aes(x=Fire_id, y=Burndate, fill=Fire_id)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette="Dark2") +
+    ylab(label="Julian date") + 
+  xlab("") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+summary(weather$Fire_id)
+
+```
+```{r}
+weather$Fire_id <- factor(weather$Fire_id, levels = c("R10171_2012", "R10252_2013", "R10070_2014"))
+```
+
+
+```{r}
+( legend_fwi = ggplot(weather, aes(x=Fire_id, y=Burndate, fill=Fire_id)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette="Dark2", name="Fire event", breaks=c("R10171_2012", "R10252_2013", "R10070_2014"),
+                         labels=c("Entiako", "Tweedsmuir", "Chelaslie")) +
+    ylab(label="Julian date") + 
+  xlab("") +
+  theme_bw() +
+   theme(legend.position = "bottom") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) )
+```
+
+```{r fig.height=4.5, fig.width=6}
+legend = cowplot::get_legend(legend_fwi)
+(weather_plot1 = cowplot::plot_grid(fwi, rh, temp, ws, align = "hv", ncol= 2)  +
+   draw_label("(a)", x = .11, y = .95, size = 10) +
+   draw_label("(b)", x = .61, y = .95, size = 10) +
+   draw_label("(c)", x = .11, y = .45, size = 10) +
+   draw_label("(d)", x = .61, y = .45, size = 10) )
+
+
+(weather_plot2 = plot_grid(weather_plot1, legend, ncol=1, rel_widths = c(1, .1), rel_heights = c(1, .05)))
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/DailyFireWeather.jpeg", plot = weather_plot2, width = 6, height = 4.5, units = c("in"), dpi=600 )
+```
+**THE END**

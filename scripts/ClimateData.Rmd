@@ -1,0 +1,191 @@
+---
+title: "Climate Data"
+author: "Anna Talucci"
+date: "6/7/2021"
+output: html_document
+---
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+
+
+# Overview
+
+Climate moisture deficit (CMD) as an indicator of anomalously warm and dry fire weather conditions in subboreal systems. This script compiles CMD data from the Climate western North America (WNA) data (Wang et al 2011). We assemble CMD for the years of fire events and the climate normals (1981-2010) data for a visual comparison.
+
+Data From???
+# Packages
+
+```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(DT)
+library(RColorBrewer)
+library(cowplot)
+```
+
+# Data extract and organize
+
+We will read in the monthly CMD data for each year in order to combine, organize and extract annual values.
+
+## 2016 BC Climate data 
+
+```{r}
+c2016 = read.csv("../data/climate/2016_climate.csv", header=TRUE, sep = ",", strip.white = TRUE)
+datatable(c2016)
+```
+
+```{r}
+c2016 = c2016 %>%
+    mutate(year = "2016") %>% 
+    mutate(CMD = CMD01+CMD02+CMD03+CMD04+CMD05+CMD06+CMD07+CMD08+CMD09+CMD10+CMD11+CMD12) %>%
+    dplyr::select(plot, Latitude, Longitude, Elevation, year, CMD)
+head(c2016)
+```
+
+
+
+## 2015 BC Climate data 
+
+```{r}
+c2015 = read.csv("../data/climate/2015_climate.csv", header=TRUE, sep = ",", strip.white = TRUE)
+head(c2015)
+```
+
+```{r}
+c2015 = c2015 %>%
+    mutate(year = "2015") %>% 
+    mutate(CMD = CMD01+CMD02+CMD03+CMD04+CMD05+CMD06+CMD07+CMD08+CMD09+CMD10+CMD11+CMD12) %>%
+    dplyr::select(plot, Latitude, Longitude, Elevation, year, CMD)
+
+head(c2015)
+```
+
+## 2014 BC Climate data 
+
+```{r}
+c2014 = read.csv("../data/climate/2014_climate.csv", header=TRUE, sep = ",", strip.white = TRUE)
+head(c2014)
+```
+
+```{r}
+c2014 = c2014 %>%
+    mutate(year = "2014") %>% 
+    mutate(CMD = CMD01+CMD02+CMD03+CMD04+CMD05+CMD06+CMD07+CMD08+CMD09+CMD10+CMD11+CMD12) %>%
+    dplyr::select(plot, Latitude, Longitude, Elevation, year, CMD)
+
+head(c2014)
+```
+
+## 2013 BC Climate data 
+
+```{r}
+c2013 = read.csv("../data/climate/2013_climate.csv", header=TRUE, sep = ",", strip.white = TRUE)
+head(c2013)
+```
+
+```{r}
+c2013 = c2013 %>%
+    mutate(year = "2013") %>% 
+    mutate(CMD = CMD01+CMD02+CMD03+CMD04+CMD05+CMD06+CMD07+CMD08+CMD09+CMD10+CMD11+CMD12) %>%
+    dplyr::select(plot, Latitude, Longitude, Elevation, year, CMD)
+  
+head(c2013)
+```
+
+## 2012 BC Climate data 
+
+```{r}
+c2012 = read.csv("../data/climate/2012_climate.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+```{r}
+c2012 = c2012 %>%
+    mutate(year = "2012") %>% 
+    mutate(CMD = CMD01+CMD02+CMD03+CMD04+CMD05+CMD06+CMD07+CMD08+CMD09+CMD10+CMD11+CMD12) %>%
+    dplyr::select(plot, Latitude, Longitude, Elevation, year, CMD)
+
+head(c2012)
+```
+
+## 2011 BC Climate data 
+
+```{r}
+c2011 = read.csv("../data/climate/2011_climate.csv", header=TRUE, sep = ",", strip.white = TRUE)
+head(c2011)
+```
+
+```{r}
+c2011 = c2011 %>%
+   mutate(year = "2011") %>% 
+   mutate(CMD = CMD01+CMD02+CMD03+CMD04+CMD05+CMD06+CMD07+CMD08+CMD09+CMD10+CMD11+CMD12) %>%
+  dplyr::select(plot, Latitude, Longitude, Elevation, year, CMD)
+
+head(c2011)
+```
+
+# Climate Normal Data
+
+```{r}
+norm61 = read.csv("../data/climate/climate_normal1961-2000.csv", header=TRUE, sep = ",", strip.white = TRUE)
+head(norm61)
+
+```
+
+```{r}
+norm81 = read.csv("../data/climate/climate_normal_1981-2000.csv", header=TRUE, sep = ",", strip.white = TRUE)
+head(norm81)
+```
+
+```{r}
+norm81 = norm81 %>%
+   mutate(year = "1981-2010") %>% 
+   dplyr::select(plot, Latitude, Longitude, Elevation, year, CMD)
+
+head(norm81)
+```
+
+
+## Combine multi-year climate data 
+
+```{r}
+annual_cmd = rbind(c2012, c2013, c2014, norm81)
+summary(annual_cmd)
+```
+
+```{r}
+mean_annual = annual_cmd %>%
+  group_by(year) %>%
+  summarise(mean_cmd = mean(CMD))
+mean_annual
+#datatable(mean_annual)
+```
+
+
+
+# Visualization
+
+
+```{r, echo=FALSE}
+( climatecmd = ggplot(annual_cmd, aes(x = year, y = CMD, fill = year)) +
+  geom_boxplot() +
+  ylab("Climate moisture deficit (mm)") +
+  xlab("") +
+  scale_fill_brewer(palette = "Accent") +
+  theme_bw() +
+    theme(legend.position = "none") )
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/climateCMD.tiff", plot = climatecmd, width = 6, height = 4, units = c("in"), dpi=600 )
+```
+
+
+
+
+
