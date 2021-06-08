@@ -602,11 +602,20 @@ ggsave("../figs/2019-04-15_LT-TS_NDMI_firename.jpeg", plot = gpndmi6, width = 3,
 ## NDMI by Fire Event
 ```{r fig.height=6, fig.width=3}
 legend = cowplot::get_legend(legend_lt)
-(gpndmi7 = cowplot::plot_grid(enndmi1_plot1, twndmi1_plot1, chndmi1_plot1, labels = c("A", "B", "C"), align = "hv", ncol= 1)  +
-  draw_label("Entiako", x = .29, y = .785, size = 10, fontface = "bold") +
-  draw_label("Tweedsmuir", x = .33, y = .449, size = 10, fontface = "bold") +
-  draw_label("Chelaslie", x = .31, y = .115, size = 10, fontface = "bold") )
 
+gpndmi7 = cowplot::plot_grid(enndmi1_plot1, twndmi1_plot1, chndmi1_plot1, align = "hv", ncol= 1)  +
+  draw_label("Entiako", x = .29, y = .77, size = 10, fontface = "bold") +
+  draw_label("Tweedsmuir", x = .33, y = .44, size = 10, fontface = "bold") +
+  draw_label("Chelaslie", x = .30, y = .11, size = 10, fontface = "bold") +
+  
+   draw_label("(a)", x = .04, y = .98, size = 10) +
+   draw_label("(b)", x = .04, y = .65, size = 10) +
+   draw_label("(c)", x = .04, y = .32, size = 10)  
+
+gpndmi7
+```
+
+```{r fig.height=6, fig.width=3}
 (gpndmi8 = plot_grid(gpndmi7, legend, ncol=1, rel_widths = c(1, .1), rel_heights = c(1, .05)))
 ```
 
@@ -614,22 +623,10 @@ legend = cowplot::get_legend(legend_lt)
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/LandTrendrTimeSeries.tiff", plot = gpndmi8, width = 3, height = 6, units = c("in"), dpi=600 )
 ```
-# NDMI & NBR Grided plots
-
-```{r fig.height=6, fig.width=6}
-legend = cowplot::get_legend(legend_lt)
-(gpcombo1 = cowplot::plot_grid(enpico_plot, enndmi1_plot, twpico_plot, twndmi1_plot, chpico_plot, chndmi1_plot, labels = c("A", "B", "C", "D", "E", "F"), align = "hv", ncol= 2)  +
-  draw_label("Entiako", x = .15, y = .785, size = 10, fontface = "bold") +
-  draw_label("Tweedsmuir", x = .165, y = .449, size = 10, fontface = "bold") +
-  draw_label("Chelaslie", x = .15, y = .115, size = 10, fontface = "bold") +
-  draw_label("Peak\n beetle", x = .315, y = .80, size = 10) +
-  draw_label("Peak\n beetle", x = .315, y = .465, size = 10) +
-  draw_label("Peak\n beetle", x = .315, y = .13, size = 10) )
-
-(gpcombo2 = plot_grid(gpcombo1, legend, ncol=1, rel_widths = c(1, .1), rel_heights = c(1, .05)))
-```
 
 
 
-#THE END
+
+
+
 **THE END**
