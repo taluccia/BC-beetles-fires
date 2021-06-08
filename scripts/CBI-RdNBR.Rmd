@@ -1,0 +1,143 @@
+---
+title: "CBI and Burn Severity"
+author: "Anna Talucci"
+date: "6/8/2021"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+library(cowplot)
+library(magick)
+library(maptree)
+library(cluster)
+
+library(ggrepel)
+
+library(RColorBrewer)
+
+```
+
+
+# Data
+
+```{r}
+cbi = read.csv("../data/CBI-Data/2018-12-10_Entiako_CBI.csv", header = TRUE, sep = ",", strip.white = TRUE)
+```
+
+```{r}
+head(cbi)
+
+```
+
+```{r}
+(extrac = cbi %>%
+  dplyr::select(plot:prefiredead, Fire, UTM.E:UTM.N, CBI.under:CBI.total))
+```
+
+
+```{r eval=FALSE, include=FALSE}
+write.csv(extrac, "../output/2018-12-10_entiakoCBI_subset.csv", quote = TRUE, row.names = FALSE, sep = ",")
+```
+
+
+## CBI plus GEE data
+
+```{r}
+cbigee = read.csv("../data/CBI-Data/2018-12-11_encbi-gee.csv", header = TRUE, sep = ",", strip.white = TRUE)
+```
+
+```{r}
+head(cbigee)
+```
+```{r}
+unique(cbigee$CBI_total)
+```
+
+
+```{r}
+
+cbigee1 = cbigee %>% mutate("severity"= 
+                    ifelse(between(CBI_total, 0,0.10),"unchanged",
+                    ifelse(between(CBI_total,0.11,1.24),"low",
+                    ifelse(between(CBI_total,1.25,2.24),"moderate",
+                    ifelse(between(CBI_total,2.25,3.0),"high","NON"))))) %>% dplyr::select(CBI_over:Fire, severity, dnbr:rdnbr)
+
+```
+
+```{r}
+str(cbigee)
+```
+
+
+
+
+# Figure
+
+## CBI v RdNBR
+```{r}
+ggplot(cbigee1, aes(x=CBI_total, y=rdnbr, color=severity)) +
+  geom_point() +
+    ylab(label="RdNBR") + 
+  xlab("CBI") +
+  
+  scale_color_manual(values = c("#ff5733",  "#ffc300", "#daf7a6", "#1f618d"), name="",
+                         breaks=c("high", "moderate", "low", "unchanged"),
+                         labels=c("High", "Moderate", "Low", "Unburned")) +
+  geom_hline(aes(yintercept=316), colour="darkorange2", linetype="dotdash", size=1)  +
+  geom_hline(aes(yintercept=640), colour="darkorange2", linetype="dotdash", size=1)  +
+  theme_bw() +
+   theme(legend.position = "bottom") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+
+
+```
+
+## CBI v RdNBR
+```{r fig.height=4, fig.width=6}
+cbi_rdnbr_plot = ggplot(cbigee1, aes( x=rdnbr,y=CBI_total, color=severity)) +
+  geom_point() +
+    xlab(label="RdNBR") + 
+  ylab("CBI") +
+  
+  scale_color_manual(values = c("#ff5733",  "#ffc300", "#daf7a6", "#1f618d"), name="CBI severity class",
+                         breaks=c("high", "moderate", "low", "unchanged"),
+                         labels=c("High", "Moderate", "Low", "Unburned")) +
+  geom_hline(aes(yintercept=2.25), colour="gray50", linetype="longdash", size=1)  +
+   annotate(geom="text", label=2.25, x=0, y=2.25, vjust=-.5, color="gray50") +
+  geom_vline(aes(xintercept=641), colour="gray50", linetype="solid", size=1)  +
+   annotate(geom="text", label=641, x=641, y=0.1, vjust=-.5, color="gray50", angle=90) +
+  theme_bw() +
+   theme(legend.position = "bottom") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
+
+cbi_rdnbr_plot
+```
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/CBI-RdNBR.png", plot = cbi_rdnbr_plot, width = 6, height = 4, units = c("in"), dpi=600 )
+```
+
+`
+**THE END**
