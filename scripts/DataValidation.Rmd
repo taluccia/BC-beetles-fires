@@ -1,0 +1,234 @@
+---
+title: "Validation Data"
+author: "Anna Talucci"
+date: "6/18/2021"
+output: html_document
+---
+
+
+num_groups = 10
+
+iris %>% 
+   group_by((row_number()-1) %/% (n()/num_groups)) %>%
+   nest %>% pull(data)
+
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+
+## Library
+```{r include=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(purrr)
+library(stringr)
+```
+
+
+
+# Data
+
+```{r}
+df = read.csv("../data/CombinedData/CombineData.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+```{r}
+head(df)
+```
+```{r}
+num_groups = 10
+
+list_a = df %>% 
+  group_by(fwi_lohi, rdnbr_class) %>%
+   group_by((row_number()-1) %/% (n()/num_groups)) %>%
+   nest %>% pull(data) 
+
+list_a
+```
+
+# Unlist dataframes
+```{r}
+for (i in seq(list_a))
+  assign(paste0("df", i), list_a[[i]])
+```
+
+# Select columns
+```{r}
+data1 = df1 %>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data1
+```
+
+```{r}
+data2 = df2 %>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data2
+```
+
+```{r}
+data3 = df3 %>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data3
+```
+
+```{r}
+data4 = df4 %>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data4
+```
+
+```{r}
+data5 = df5 %>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data5
+```
+
+```{r}
+data6 = df6%>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data6
+```
+
+```{r}
+data7 = df7%>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data7
+```
+
+```{r}
+data8 = df8 %>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data8
+```
+
+```{r}
+data9 = df9 %>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data9
+```
+
+```{r}
+data10 = df10 %>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data10
+```
+# Save each dataframe
+```{r}
+write.csv(data1, '../outputs/ValidationData/df1.csv',  row.names = FALSE)
+write.csv(data2, '../outputs/ValidationData/df2.csv',  row.names = FALSE)
+write.csv(data3, '../outputs/ValidationData/df3.csv',  row.names = FALSE)
+write.csv(data4, '../outputs/ValidationData/df4.csv',  row.names = FALSE)
+write.csv(data5, '../outputs/ValidationData/df5.csv',  row.names = FALSE)
+write.csv(data6, '../outputs/ValidationData/df6.csv',  row.names = FALSE)
+write.csv(data7, '../outputs/ValidationData/df7.csv',  row.names = FALSE)
+write.csv(data8, '../outputs/ValidationData/df8.csv',  row.names = FALSE)
+write.csv(data9, '../outputs/ValidationData/df9.csv',  row.names = FALSE)
+write.csv(data10, '../outputs/ValidationData/df10.csv',  row.names = FALSE)
+```
+
+# Drop NDVI
+
+```{r}
+noNdvi1 = df1 %>%
+  dplyr::select(elevation, fwi, ndviprefire, rdnbr_class)
+noNdvi1
+```
+
+```{r}
+noNdvi2 = df2 %>%
+  dplyr::select(elevation, fwi, ndviprefire, rdnbr_class)
+noNdvi2
+```
+
+```{r}
+noNdvi3 = df3 %>%
+  dplyr::select(elevation, fwi, ndviprefire, rdnbr_class)
+noNdvi3
+```
+
+```{r}
+noNdvi4 = df4 %>%
+  dplyr::select(elevation, fwi, ndviprefire, rdnbr_class)
+noNdvi4
+```
+
+```{r}
+noNdvi5 = df5 %>%
+  dplyr::select(elevation, fwi, ndviprefire, rdnbr_class)
+noNdvi5
+```
+
+```{r}
+noNdvi6 = df6%>%
+  dplyr::select(elevation, fwi, ndviprefire, rdnbr_class)
+noNdvi6
+```
+
+```{r}
+noNdvi7 = df7%>%
+  dplyr::select(elevation, fwi, ndviprefire, rdnbr_class)
+noNdvi7
+```
+
+```{r}
+noNdvi8 = df8 %>%
+  dplyr::select(elevation, fwi, ndviprefire, rdnbr_class)
+noNdvi8
+```
+
+```{r}
+noNdvi9 = df9 %>%
+  dplyr::select(elevation, fwi, ndviprefire, rdnbr_class)
+noNdvi9
+```
+
+```{r}
+noNdvi10 = df10 %>%
+  dplyr::select(elevation, fwi, ndviprefire, rdnbr_class)
+noNdvi10
+```
+
+```{r}
+write.csv(noNdvi1, '../outputs/ValidationNoNdvi/df1.csv',  row.names = FALSE)
+write.csv(noNdvi2, '../outputs/ValidationNoNdvi/df2.csv',  row.names = FALSE)
+write.csv(noNdvi3, '../outputs/ValidationNoNdvi/df3.csv',  row.names = FALSE)
+write.csv(noNdvi4, '../outputs/ValidationNoNdvi/df4.csv',  row.names = FALSE)
+write.csv(noNdvi5, '../outputs/ValidationNoNdvi/df5.csv',  row.names = FALSE)
+write.csv(noNdvi6, '../outputs/ValidationNoNdvi/df6.csv',  row.names = FALSE)
+write.csv(noNdvi7, '../outputs/ValidationNoNdvi/df7.csv',  row.names = FALSE)
+write.csv(noNdvi8, '../outputs/ValidationNoNdvi/df8.csv',  row.names = FALSE)
+write.csv(noNdvi9, '../outputs/ValidationNoNdvi/df9.csv',  row.names = FALSE)
+write.csv(noNdvi10, '../outputs/ValidationNoNdvi/df10.csv',  row.names = FALSE)
+```
+# Combine first 9 dataframes
+
+```{r}
+dat90 = bind_rows(df1, df2, df3, df4, df5, df6, df7, df8, df9)
+
+```
+
+```{r}
+data90 = dat90 %>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data90
+```
+
+```{r}
+write.csv(data90, '../outputs/ValidationData/data90.csv',  row.names = FALSE)
+```
+
+
+```{r}
+noNdvi90 = dat90 %>%
+  dplyr::select(elevation, fwi, ndviprefire, rdnbr_class)
+noNdvi90
+```
+
+```{r}
+write.csv(noNdvi90, '../outputs/ValidationNoNdvi/data90.csv',  row.names = FALSE)
+```
