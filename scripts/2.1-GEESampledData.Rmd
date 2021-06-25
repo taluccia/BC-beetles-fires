@@ -225,7 +225,10 @@ df2
 
 ```
 
-
+# Write to csv
+```{r eval=FALSE, include=FALSE}
+write.csv(df2, '../outputs/CombinedData/CombineData.csv', row.names = FALSE)
+```
 # Create Training Data
 ## Randomly sample 60%  of data
 
@@ -277,6 +280,11 @@ write.csv(train.data, '../outputs/TrainingData/TrainData.csv', row.names = FALSE
 ```
 
 
+num_groups = 10
+
+iris %>% 
+   group_by((row_number()-1) %/% (n()/num_groups)) %>%
+   nest %>% pull(data)
 
 
 # Hitograms of trainning data
