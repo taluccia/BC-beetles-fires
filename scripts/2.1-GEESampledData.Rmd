@@ -229,6 +229,8 @@ df2
 ```{r eval=FALSE, include=FALSE}
 write.csv(df2, '../outputs/CombinedData/CombineData.csv', row.names = FALSE)
 ```
+
+
 # Create Training Data
 ## Randomly sample 60%  of data
 
@@ -261,6 +263,10 @@ train.data %>%
   count(FireYr) 
 ```
 
+```{r}
+train.data %>% group_by(FireYr) %>%
+  summarise(count= n()) 
+```
 
 ```{r}
 train.data %>% 
