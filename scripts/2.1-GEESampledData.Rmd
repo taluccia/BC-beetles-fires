@@ -230,7 +230,30 @@ df2
 write.csv(df2, '../outputs/CombinedData/CombineData.csv', row.names = FALSE)
 ```
 
+```{r}
+df3 = df2 %>% filter(fwi >= 14)
+df3
+```
 
+```{r eval=FALSE, include=FALSE}
+write.csv(df3, '../outputs/CombinedData/CombineDataModExt.csv', row.names = FALSE)
+```
+
+```{r}
+
+df3 %>% 
+  count(rdnbr_class) 
+
+df3 %>% 
+  filter(fwi_lohi == "1") %>%
+  count(rdnbr_class) 
+
+df3 %>% 
+  filter(fwi_lohi == "2") %>%
+  count(rdnbr_class) 
+```
+**DELETE**
+#  DELETE!!!!
 # Create Training Data
 ## Randomly sample 60%  of data
 

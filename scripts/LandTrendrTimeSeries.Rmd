@@ -14,330 +14,109 @@ knitr::opts_chunk$set(echo = TRUE)
 LandTrendr Time Series Analysis
 NBR, NDMI, and NDVI
 
-
-
 # Packages
 ```{r, message=FALSE, warning=FALSE}
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-
 library(RColorBrewer)
 library(cowplot)
 ```
 
-# NBR 
-
-## Chelaslie 
-### Field Points
-
-```{r}
-chfp = read.csv("../data/LT-TS/2018-11-20_LT-GEE-chfp.csv", header=TRUE, sep = ",", strip.white = TRUE)
-head(chfp)
-```
-#### Extract Sourced Data
-```{r}
-sel_org = chfp%>%dplyr::select(Year:Original)
-org = sel_org%>%mutate(line_type = "raw")
-org = rename(org, year = Year, nbr=Original, line_type=line_type)
-org
-```
-#### Extract Fitted Data
-```{r}
-sel_fit = chfp%>%dplyr::select(Year, Fitted)
-fit=sel_fit%>%mutate(line_type = "fit")
-fit = rename(fit, year = Year, nbr=Fitted, line_type=line_type)
-fit
-```
-#### Combine Sourced and Fitted Data
-```{r}
-chfp2 = rbind(org, fit)
-summary(chfp2)
-```
-
-### Chelaslie VIR PICO Data (1726)
-```{r}
-chpico = read.csv("../data/LT-TS/2018-11-20_LT-GEE-chpico.csv", header=TRUE, sep = ",", strip.white = TRUE)
-head(chpico)
-```
-
-#### Extract Sourced Data
-```{r}
-sel_org2 = chpico%>%dplyr::select(Year:Original)
-org2 = sel_org2%>%mutate(line_type = "raw")
-org2 = rename(org2, year = Year, nbr=Original, line_type=line_type)
-org2
-```
-#### Extract Fitted Data
-```{r}
-sel_fit2 = chpico%>%dplyr::select(Year, Fitted)
-fit2 = sel_fit2%>%mutate(line_type = "fit")
-fit2 = rename(fit2, year = Year, nbr=Fitted, line_type=line_type)
-fit
-```
-#### COmbine sourced and fitted data
-```{r}
-chpico2 = rbind(org2, fit2)
-summary(chpico2)
-```
-
-#### Graph Sourced and Fitted Data
-```{r}
-chpico_plot = ggplot(chpico2, aes(x = year, y = nbr, color = line_type)) +
-  geom_line(size=1) +
-  scale_color_manual(values = c("#2b83ba", "#f03b20"), name="",
-                         breaks=c("raw", "fit"),
-                         labels=c("Source", "Fitted")) +
-    ylab(label="NBR") + 
-  xlab("Year") +
-  theme_bw() +
-    geom_vline(aes(xintercept=2000), colour="darkorange2", linetype="dashed", size=1)  +
-  geom_vline(aes(xintercept=2006), colour="darkorange2", linetype="dashed", size=1)  +
-  geom_vline(aes(xintercept=1995), colour="gray", linetype="dotdash", size=1)  +
-  geom_vline(aes(xintercept=2013), colour="gray", linetype="dotdash", size=1)  +  
-  theme(legend.position = "none") +
-    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
-    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
-        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black")) 
-
-```
-
-
-## Enitako 
-### Field Points
-```{r}
-enfp = read.csv("../data/LT-TS/2018-11-20_LT-GEE-enfp.csv", header=TRUE, sep = ",", strip.white = TRUE)
-head(enfp)
-```
-
-### Entiako VRI PICO (164 points)
-```{r}
-enpico = read.csv("../data/LT-TS/2018-11-20_LT-GEE-enpico.csv", header=TRUE, sep = ",", strip.white = TRUE)
-head(enpico)
-```
-#### Extract Sourced Data
-```{r}
-sel_org3 = enpico%>%dplyr::select(Year:Original)
-org3=sel_org3%>%mutate(line_type = "raw")
-org3 = rename(org3, year = Year, nbr=Original, line_type=line_type)
-org3
-```
-#### Extract Fitted Data
-```{r}
-sel_fit3 = enpico%>%dplyr::select(Year, Fitted)
-fit3=sel_fit3%>%mutate(line_type = "fit")
-fit3 = rename(fit3, year = Year, nbr=Fitted, line_type=line_type)
-fit3
-```
-#### Combine sourced and Fitted Data
-```{r}
-enpico3 = rbind(org3, fit3)
-summary(enpico3)
-```
-#### Graph Sourced and Fitted Data
-```{r}
-
-( enpico_plot = ggplot(enpico3, aes(x = year, y = nbr, color = line_type)) +
-  geom_line(size=1) +
-  scale_color_manual(values = c("#2b83ba", "#f03b20"), name="",
-                         breaks=c("raw", "fit"),
-                         labels=c("Source", "Fitted")) +
-    ylab(label="NBR") + 
-  xlab("Year") +
-  theme_bw() +
-     geom_vline(aes(xintercept=2000), colour="darkorange2", linetype="dashed", size=1)  +
-  geom_vline(aes(xintercept=2006), colour="darkorange2", linetype="dashed", size=1)  +
-  geom_vline(aes(xintercept=1995), colour="gray", linetype="dotdash", size=1)  +
-  geom_vline(aes(xintercept=2011), colour="gray", linetype="dotdash", size=1)  +    
-  theme(legend.position = "none") +
-    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
-    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
-        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black")) )
-
-
-```
-
-
-```{r}
-plot_enpico=ggplot(enpico, aes(x = Year)) + 
-  geom_line(aes(y = Original), colour="#2b83ba") + 
-  geom_line(aes(y = Fitted), colour = "#f03b20") + 
-  ylab(label="NBR") + 
-  xlab("Year")
-```
-
-
-## Tweeds 
-### Field Points
-```{r}
-twfp = read.csv("../data/LT-TS/2018-11-20_LT-GEE-twfp.csv", header=TRUE, sep = ",", strip.white = TRUE)
-head(twfp)
-```
-
-### VRI Tweeds PICO
-
-```{r}
-twpico = read.csv("../data/LT-TS/2018-11-20_LT-GEE-twpico.csv", header=TRUE, sep = ",", strip.white = TRUE)
-head(twpico)
-```
-#### Extract Sourced Data
-```{r}
-sel_org4 = twpico%>%dplyr::select(Year:Original)
-org4=sel_org4%>%mutate(line_type = "raw")
-org4 = rename(org4, year = Year, nbr=Original, line_type=line_type)
-org4
-```
-#### Extract Fitted Data
-```{r}
-sel_fit4 = twpico%>%dplyr::select(Year, Fitted)
-fit4=sel_fit4%>%mutate(line_type = "fit")
-fit4 = rename(fit4, year = Year, nbr=Fitted, line_type=line_type)
-fit4
-```
-#### Combine sourced and Fitted Data
-```{r}
-twpico4 = rbind(org4, fit4)
-summary(twpico4)
-
-```
-
-
-#### Graph Sourced and Fitted Data
-```{r}
-(twpico_plot = ggplot(twpico4, aes(x = year, y = nbr, color = line_type)) +
-  geom_line(size=1) +
-  scale_color_manual(values = c("#2b83ba", "#f03b20"), name="",
-                         breaks=c("raw", "fit"),
-                         labels=c("Source", "Fitted")) +
-    ylab(label="NBR") + 
-  xlab("Year") +
-  geom_vline(aes(xintercept=2000), colour="darkorange2", linetype="dashed", size=1)  +
-  geom_vline(aes(xintercept=2006), colour="darkorange2", linetype="dashed", size=1)  +
-  geom_vline(aes(xintercept=1995), colour="gray", linetype="dotdash", size=1)  +
-  geom_vline(aes(xintercept=2012), colour="gray", linetype="dotdash", size=1)  +
-  theme_bw() +
-       theme(legend.position = "none") +
-    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
-    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
-        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black")) )
-
-```
-
-
-```{r}
-(legend_lt = ggplot(twpico4, aes(x = year, y = nbr, color = line_type)) +
-  geom_line(size=1) +
-  scale_color_manual(values = c("#2b83ba", "#f03b20"), name="",
-                         breaks=c("raw", "fit"),
-                         labels=c("Source", "Fitted")) +
-    ylab(label="NBR") + 
-  xlab("Year") +
-  theme_bw() +
-   theme(legend.position = "bottom") +
-    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
-    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
-        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black")) )
-```
-
-
-
-
-# NBR Girded plots
-```{r fig.height=6, fig.width=3}
-legend = cowplot::get_legend(legend_lt)
-(gp1 = cowplot::plot_grid(enpico_plot, twpico_plot, chpico_plot, labels = c("A", "B", "C"), align = "hv", ncol= 1)  +
-  draw_label("R10171", x = .27, y = .785, size = 10, fontface = "bold") +
-  draw_label("R10252", x = .27, y = .449, size = 10, fontface = "bold") +
-  draw_label("R10070", x = .27, y = .115, size = 10, fontface = "bold") +
-  draw_label("Peak\n beetle", x = .625, y = .80, size = 10) +
-  draw_label("Peak\n beetle", x = .625, y = .465, size = 10) +
-  draw_label("Peak\n beetle", x = .625, y = .13, size = 10) )
-
-(gp2 = plot_grid(gp1, legend, ncol=1, rel_widths = c(1, .1), rel_heights = c(1, .05)))
-```
- 
-```{r eval=FALSE, include=FALSE}
-ggsave("../figs/2019-02-14_Segemtation.jpeg", plot = gp2, width = 2.5, height = 5, units = c("in"), dpi=600 )
-```
-
-```{r eval=FALSE, include=FALSE}
-ggsave("../figs/2019-03-26_Segemtation.jpeg", plot = gp2, width = 3, height = 6, units = c("in"), dpi=600 )
-```
-
-
-
-
-
-# NDMI
-## Chelaslie 
-
-
-### Chelaslie VIR PICO Data (1726)
+# Data
 ```{r}
 chndmi = read.csv("../data/LT-TS/2019-04-04_chelaslie_pico_NDMI.csv", header=TRUE, sep = ",", strip.white = TRUE)
 head(chndmi)
 ```
 
-#### Extract Sourced Data
+
+```{r}
+enndmi = read.csv("../data/LT-TS/2019-04-04_entiako_pico_NDMI.csv", header=TRUE, sep = ",", strip.white = TRUE)
+head(enndmi)
+```
+
+```{r}
+twnmdi = read.csv("../data/LT-TS/2019-04-04_tweeds_pico_NDMI.csv", header=TRUE, sep = ",", strip.white = TRUE)
+head(twnmdi)
+```
+
+# Organize Data
+## Chelaslie
+### Extract Sourced Data
 ```{r}
 chndmiorg2 = chndmi%>%dplyr::select(Year:Original)
 chndmiorg2 = chndmiorg2%>%mutate(line_type = "raw")
 chndmiorg2 = rename(chndmiorg2, year = Year, ndmi=Original, line_type=line_type)
 chndmiorg2
 ```
-#### Extract Fitted Data
+
+### Extract Fitted Data
 ```{r}
 chndmifit2 = chndmi%>%dplyr::select(Year, Fitted)
 chndmifit2 = chndmifit2%>%mutate(line_type = "fit")
 chndmifit2 = rename(chndmifit2, year = Year, ndmi=Fitted, line_type=line_type)
 chndmifit2
 ```
-#### COmbine sourced and fitted data
+
+### COmbine sourced and fitted data
 ```{r}
 chndmi1 = rbind(chndmiorg2, chndmifit2)
 summary(chndmi1)
 ```
 
-#### Graph Sourced and Fitted Data
-```{r}
-( chndmi1_plot = ggplot(chndmi1, aes(x = year, y = ndmi, color = line_type)) +
-  geom_line(size=1) +
-  scale_color_manual(values = c("#2b83ba", "#f03b20"), name="",
-                         breaks=c("raw", "fit"),
-                         labels=c("Source", "Fitted")) +
-    ylab(label="NDMI") + 
-  xlab("Year") +
-  theme_bw() +
-    geom_vline(aes(xintercept=2000), colour="darkorange2", linetype="dashed", size=1)  +
-  geom_vline(aes(xintercept=2006), colour="darkorange2", linetype="dashed", size=1)  +
-  geom_vline(aes(xintercept=1995), colour="gray", linetype="dotdash", size=1)  +
-  geom_vline(aes(xintercept=2013), colour="gray", linetype="dotdash", size=1)  +  
-  theme(legend.position = "none") +
-    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
-    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
-        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black")) )
+## Entako
 
+### Extract Sourced Data
+```{r}
+enndmiorg3 = enndmi %>% 
+  dplyr::select(Year:Original) %>% 
+  mutate(line_type = "raw") %>%
+  rename(year = Year, ndmi=Original, line_type=line_type) %>%
+  filter(ndmi > 0)
+enndmiorg3
 ```
+
+### Extract Fitted Data
+```{r}
+enndmifit3 = enndmi %>% 
+  dplyr::select(Year, Fitted) %>%
+  mutate(line_type = "fit") %>%
+  rename(year = Year, ndmi=Fitted, line_type=line_type)
+
+enndmifit3
+```
+
+### Combine sourced and Fitted Data
+```{r}
+enndmi1 = rbind(enndmiorg3, enndmifit3)
+summary(enndmi1)
+```
+
+## Tweeds
+### Extract Sourced Data
+```{r}
+twndmiorg4 = twnmdi%>%dplyr::select(Year:Original)
+twndmiorg4=twndmiorg4%>%mutate(line_type = "raw")
+twndmiorg4 = rename(twndmiorg4, year = Year, ndmi=Original, line_type=line_type)
+twndmiorg4
+```
+### Extract Fitted Data
+```{r}
+twndmifit4 = twnmdi%>%dplyr::select(Year, Fitted)
+twndmifit4 = twndmifit4%>%mutate(line_type = "fit")
+twndmifit4 = rename(twndmifit4, year = Year, ndmi=Fitted, line_type=line_type)
+twndmifit4
+```
+### Combine sourced and Fitted Data
+```{r}
+twnmdi1 = rbind(twndmiorg4, twndmifit4)
+summary(twnmdi1)
+```
+
+
+# Graph Sourced and Fitted Data
+## Chelaslie
+
 
 ```{r}
 ( chndmi1_plot1 = ggplot(chndmi1, aes(x = year, y = ndmi, color = line_type)) +
@@ -361,57 +140,10 @@ summary(chndmi1)
 
 ```
 
-## Enitako 
-### Entiako VRI PICO (164 points)
-```{r}
-enndmi = read.csv("../data/LT-TS/2019-04-04_entiako_pico_NDMI.csv", header=TRUE, sep = ",", strip.white = TRUE)
-head(enndmi)
-```
-#### Extract Sourced Data
-```{r}
-enndmiorg3 = enndmi%>%dplyr::select(Year:Original)
-enndmiorg3 = enndmiorg3%>%mutate(line_type = "raw")
-enndmiorg3 = rename(enndmiorg3, year = Year, ndmi=Original, line_type=line_type)
-enndmiorg3
-```
-#### Extract Fitted Data
-```{r}
-enndmifit3 = enndmi%>%dplyr::select(Year, Fitted)
-enndmifit3 = enndmifit3%>%mutate(line_type = "fit")
-enndmifit3 = rename(enndmifit3, year = Year, ndmi=Fitted, line_type=line_type)
-enndmifit3
-```
-#### Combine sourced and Fitted Data
-```{r}
-enndmi1 = rbind(enndmiorg3, enndmifit3)
-summary(enndmi1)
-```
-#### Graph Sourced and Fitted Data
-```{r}
-
-( enndmi1_plot = ggplot(enndmi1, aes(x = year, y = ndmi, color = line_type)) +
-  geom_line(size=1) +
-  scale_color_manual(values = c("#2b83ba", "#f03b20"), name="",
-                         breaks=c("raw", "fit"),
-                         labels=c("Source", "Fitted")) +
-    ylab(label="NDMI") + 
-  xlab("Year") +
-  theme_bw() +
-     geom_vline(aes(xintercept=2000), colour="darkorange2", linetype="dashed", size=1)  +
-  geom_vline(aes(xintercept=2006), colour="darkorange2", linetype="dashed", size=1)  +
-  geom_vline(aes(xintercept=1995), colour="gray", linetype="dotdash", size=1)  +
-  geom_vline(aes(xintercept=2011), colour="gray", linetype="dotdash", size=1)  +    
-  theme(legend.position = "none") +
-    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
-    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
-        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black")) )
 
 
-```
+## Entiako
+
 
 ```{r}
 
@@ -439,56 +171,6 @@ summary(enndmi1)
 
 
 ## Tweeds 
-### VRI Tweeds PICO
-```{r}
-twnmdi = read.csv("../data/LT-TS/2019-04-04_tweeds_pico_NDMI.csv", header=TRUE, sep = ",", strip.white = TRUE)
-head(twnmdi)
-```
-#### Extract Sourced Data
-```{r}
-twndmiorg4 = twnmdi%>%dplyr::select(Year:Original)
-twndmiorg4=twndmiorg4%>%mutate(line_type = "raw")
-twndmiorg4 = rename(twndmiorg4, year = Year, ndmi=Original, line_type=line_type)
-twndmiorg4
-```
-#### Extract Fitted Data
-```{r}
-twndmifit4 = twnmdi%>%dplyr::select(Year, Fitted)
-twndmifit4 = twndmifit4%>%mutate(line_type = "fit")
-twndmifit4 = rename(twndmifit4, year = Year, ndmi=Fitted, line_type=line_type)
-twndmifit4
-```
-#### Combine sourced and Fitted Data
-```{r}
-twnmdi1 = rbind(twndmiorg4, twndmifit4)
-summary(twnmdi1)
-```
-
-
-#### Graph Sourced and Fitted Data
-```{r}
-(twndmi1_plot = ggplot(twnmdi1, aes(x = year, y = ndmi, color = line_type)) +
-  geom_line(size=1) +
-  scale_color_manual(values = c("#2b83ba", "#f03b20"), name="",
-                         breaks=c("raw", "fit"),
-                         labels=c("Source", "Fitted")) +
-    ylab(label="NDMI") + 
-  xlab("Year") +
-  geom_vline(aes(xintercept=2000), colour="darkorange2", linetype="dashed", size=1)  +
-  geom_vline(aes(xintercept=2006), colour="darkorange2", linetype="dashed", size=1)  +
-  geom_vline(aes(xintercept=1995), colour="gray", linetype="dotdash", size=1)  +
-  geom_vline(aes(xintercept=2012), colour="gray", linetype="dotdash", size=1)  +
-  theme_bw() +
-       theme(legend.position = "none") +
-    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
-    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
-        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black")) )
-
-```
 
 ```{r}
 (twndmi1_plot1 = ggplot(twnmdi1, aes(x = year, y = ndmi, color = line_type)) +
@@ -512,20 +194,20 @@ summary(twnmdi1)
 
 ```
 
-```{r fig.height=4, fig.width=6}
-(twndmi1_plot_pp = ggplot(twnmdi1, aes(x = year, y = ndmi, color = line_type)) +
+
+
+# Figures
+## Legend
+```{r}
+(legend_lt = ggplot(twnmdi1, aes(x = year, y = ndmi, color = line_type)) +
   geom_line(size=1) +
   scale_color_manual(values = c("#2b83ba", "#f03b20"), name="",
                          breaks=c("raw", "fit"),
                          labels=c("Source", "Fitted")) +
-    ylab(label="NDMI") + 
+    ylab(label="NBR") + 
   xlab("Year") +
-  geom_vline(aes(xintercept=2000), colour="darkorange2", linetype="dashed", size=1)  +
-  geom_vline(aes(xintercept=2006), colour="darkorange2", linetype="dashed", size=1)  +
-  geom_vline(aes(xintercept=1995), colour="gray", linetype="dotdash", size=1)  +
-  geom_vline(aes(xintercept=2012), colour="gray", linetype="dotdash", size=1)  +
   theme_bw() +
-       theme(legend.position = "bottom") +
+   theme(legend.position = "bottom") +
     theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
     theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
         axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
@@ -533,73 +215,9 @@ summary(twnmdi1)
         axis.text.y = element_text(size = 10, color = "black"),
         panel.background = element_blank(), 
         axis.line = element_line(colour = "black")) )
-
 ```
 
-
-
-```{r eval=FALSE, include=FALSE}
-ggsave("../figs/2019-04-049_LT-TS_NDMI_ppt.jpeg", plot = twndmi1_plot_pp, width = 6, height = 4, units = c("in"), dpi=600 )
-```
-
-# NDMI Girded plots
-```{r fig.height=6, fig.width=3}
-legend = cowplot::get_legend(legend_lt)
-(gpndmi1 = cowplot::plot_grid(enndmi1_plot, twndmi1_plot, chndmi1_plot, labels = c("A", "B", "C"), align = "hv", ncol= 1)  +
-  draw_label("R10171", x = .27, y = .785, size = 10, fontface = "bold") +
-  draw_label("R10252", x = .27, y = .449, size = 10, fontface = "bold") +
-  draw_label("R10070", x = .27, y = .115, size = 10, fontface = "bold") +
-  draw_label("Peak\n beetle", x = .625, y = .80, size = 10) +
-  draw_label("Peak\n beetle", x = .625, y = .465, size = 10) +
-  draw_label("Peak\n beetle", x = .625, y = .13, size = 10) )
-
-(gpndmi2 = plot_grid(gpndmi1, legend, ncol=1, rel_widths = c(1, .1), rel_heights = c(1, .05)))
-```
- 
-
-
-```{r eval=FALSE, include=FALSE}
-ggsave("../figs/2019-04-04_LT-TS_NDMI.jpeg", plot = gpndmi2, width = 3, height = 6, units = c("in"), dpi=600 )
-```
-
-```{r fig.height=6, fig.width=3}
-legend = cowplot::get_legend(legend_lt)
-(gpndmi3 = cowplot::plot_grid(enndmi1_plot, twndmi1_plot, chndmi1_plot, labels = c("A", "B", "C"), align = "hv", ncol= 1)  +
-  draw_label("Entiako", x = .29, y = .785, size = 10, fontface = "bold") +
-  draw_label("Tweedsmuir", x = .33, y = .449, size = 10, fontface = "bold") +
-  draw_label("Chelaslie", x = .31, y = .115, size = 10, fontface = "bold") +
-  draw_label("Peak\n beetle", x = .625, y = .80, size = 10) +
-  draw_label("Peak\n beetle", x = .625, y = .465, size = 10) +
-  draw_label("Peak\n beetle", x = .625, y = .13, size = 10) )
-
-(gpndmi4 = plot_grid(gpndmi3, legend, ncol=1, rel_widths = c(1, .1), rel_heights = c(1, .05)))
-```
-
-
-```{r eval=FALSE, include=FALSE}
-ggsave("../figs/2019-04-04_LT-TS_NDMI_firename.jpeg", plot = gpndmi4, width = 3, height = 6, units = c("in"), dpi=600 )
-```
-
-
-```{r fig.height=6, fig.width=3}
-legend = cowplot::get_legend(legend_lt)
-(gpndmi5 = cowplot::plot_grid(enndmi1_plot1, twndmi1_plot1, chndmi1_plot1, labels = c("A", "B", "C"), align = "hv", ncol= 1)  +
-  draw_label("Entiako", x = .29, y = .785, size = 10, fontface = "bold") +
-  draw_label("Tweedsmuir", x = .33, y = .449, size = 10, fontface = "bold") +
-  draw_label("Chelaslie", x = .31, y = .115, size = 10, fontface = "bold") +
-  draw_label("Peak\n beetle", x = .625, y = .80, size = 10) +
-  draw_label("Peak\n beetle", x = .625, y = .465, size = 10) +
-  draw_label("Peak\n beetle", x = .625, y = .13, size = 10) )
-
-(gpndmi6 = plot_grid(gpndmi5, legend, ncol=1, rel_widths = c(1, .1), rel_heights = c(1, .05)))
-```
-
-
-```{r eval=FALSE, include=FALSE}
-ggsave("../figs/2019-04-15_LT-TS_NDMI_firename.jpeg", plot = gpndmi6, width = 3, height = 6, units = c("in"), dpi=600 )
-```
-
-## NDMI by Fire Event
+## NDMI 
 ```{r fig.height=6, fig.width=3}
 legend = cowplot::get_legend(legend_lt)
 
@@ -615,18 +233,11 @@ gpndmi7 = cowplot::plot_grid(enndmi1_plot1, twndmi1_plot1, chndmi1_plot1, align 
 gpndmi7
 ```
 
-```{r fig.height=6, fig.width=3}
-(gpndmi8 = plot_grid(gpndmi7, legend, ncol=1, rel_widths = c(1, .1), rel_heights = c(1, .05)))
-```
+
 
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/LandTrendrTimeSeries.tiff", plot = gpndmi8, width = 3, height = 6, units = c("in"), dpi=600 )
+ggsave("../figures/LandTrendrTimeSeries.tiff", plot = gpndmi7, width = 3, height = 6, units = c("in"), dpi=600 )
 ```
-
-
-
-
-
 
 **THE END**

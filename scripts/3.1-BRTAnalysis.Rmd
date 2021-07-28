@@ -57,7 +57,7 @@ source("../function/brt.functions.R")
 
 # Data
 ```{r}
-model.data = read.csv("../data/TrainingData/TrainData.csv", header=TRUE, sep = ",", strip.white = TRUE)
+model.data = read.csv("../data/CombinedData/CombineData.csv", header=TRUE, sep = ",", strip.white = TRUE)
 ```
 
 ```{r}
