@@ -252,6 +252,15 @@ df3 %>%
   filter(fwi_lohi == "2") %>%
   count(rdnbr_class) 
 ```
+
+
+```{r}
+
+df3 %>% 
+  count(FireYr) 
+```
+
+
 **DELETE**
 #  DELETE!!!!
 # Create Training Data

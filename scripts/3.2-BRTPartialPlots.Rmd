@@ -64,7 +64,7 @@ brt.model3 = brt.model3
 # Data
 
 ```{r}
-data = read.csv("../data/TrainingData/TrainData.csv") 
+data = read.csv("../data/CombinedData/CombineData.csv") 
 ```
 
 ```{r}
