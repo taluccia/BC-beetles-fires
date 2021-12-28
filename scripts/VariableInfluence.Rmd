@@ -1,0 +1,98 @@
+---
+title: "Variable Influence"
+author: "Anna Talucci"
+date: "12/21/2021"
+output: html_document
+---
+
+
+# Load packages
+```{r message=FALSE, warning=FALSE}
+library(gbm)
+library(dismo)
+library(purrr) # for looping
+library(ggplot2)
+library(scales)
+library(dplyr)  # for data manip
+library(cowplot)
+```
+
+
+# Plot Themes
+```{r}
+bar_theme = theme_bw() + 
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) 
+```
+
+
+# Data
+
+
+```{r}
+model1 = read.csv("../outputs/BRTmodelsFWI3/BRT1_relinf.csv") 
+model2 = read.csv("../outputs/BRTmodelsFWI3/BRT2_relinf.csv") 
+model3 = read.csv("../outputs/BRTmodelsFWI3/BRT3_relinf.csv") 
+model4 = read.csv("../outputs/BRTmodelsFWI3/BRT4_relinf.csv") 
+```
+
+
+```{r}
+head(model1)
+head(model2)
+head(model3)
+head(model4)
+```
+
+```{r}
+full = model1 %>% mutate(weather="full")
+extreme = model2 %>% mutate(weather="extreme")
+moderate = model3 %>% mutate(weather="moderate")
+benign = model4 %>% mutate(weather="benign")
+```
+mutate(name = factor(name, levels=c
+```{r}
+allData = bind_rows(full, extreme, moderate, benign) %>%
+  mutate(weather = factor(weather, levels=c("benign", "moderate", "extreme", "full")))
+```
+
+# Variabile Influence 
+
+
+```{r fig.height=4, fig.width=3.5}
+varInfPlot = allData %>% ggplot(aes(x = forcats::fct_reorder(.f = vnames, 
+                                      .x = rel.inf), 
+             y = rel.inf, 
+             fill = weather)) +
+  geom_col(position = "dodge") +
+  # flip
+  coord_flip() +
+  scale_fill_manual(values = c("#999999", "#D55E00", "#F0E442", "#56B4E9"), name = "Model", breaks = c("full", "extreme", "moderate", "benign"), labels=c("Full", "Extreme", "Moderate", "Benign"), guide = guide_legend(reverse=FALSE)) +
+   bar_theme +
+   scale_x_discrete(
+    "Explanatory Variables",
+    labels = c(
+      "fwi" = "FWI",
+      "ndviprefire" = "NDVI",
+      "elevation" = "Elevation",
+      "dndmi" = "dNDMI")) +
+  ylab('Relative Influence') +
+  theme(legend.position =c(.79, .14),
+              legend.title = element_text(size = 10),
+              legend.text = element_text(size = 10),
+              legend.key.height = unit(.15, 'in'), 
+        legend.key.width = unit(.15, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0))) +
+  guides(fill = guide_legend( ncol=1))
+ 
+varInfPlot
+```
+
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/RelativeInfluence3FWI.tiff", plot = varInfPlot, width = 3.5, height =4, units = c("in"), dpi=600 )
+```

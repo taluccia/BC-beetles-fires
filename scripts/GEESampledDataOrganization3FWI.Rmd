@@ -1,0 +1,246 @@
+---
+title: "Data Org Extreme Moderate Benign"
+author: "Anna Talucci"
+date: "7/31/2021"
+output: html_document
+---
+
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+
+## Library
+```{r include=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+
+
+# Data
+```{r}
+endata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_EnSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
+twdata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_TWSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
+chdata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_ChSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+
+# Data Inspection
+```{r}
+summary(endata)
+```
+
+```{r}
+summary(twdata)
+```
+```{r}
+summary(chdata)
+```
+
+#  Visualize Data
+
+## Entiako
+```{r}
+ggplot(endata, aes(x=ndviprefire)) + geom_histogram() 
+```
+
+
+```{r}
+ggplot(endata, aes(x=elevation)) + geom_histogram() 
+```
+
+
+
+```{r}
+ggplot(endata, aes(x=fwi)) + geom_histogram() 
+```
+
+
+```{r}
+ggplot(endata, aes(x=dndmi)) + geom_histogram() 
+```
+
+
+
+```{r}
+ggplot(endata, aes(x=rdnbr)) + geom_histogram() 
+```
+
+## Tweeds
+```{r}
+ggplot(twdata, aes(x=ndviprefire)) + geom_histogram() 
+```
+
+
+```{r}
+ggplot(twdata, aes(x=elevation)) + geom_histogram() 
+```
+
+
+
+```{r}
+ggplot(twdata, aes(x=fwi)) + geom_histogram() 
+```
+
+
+```{r}
+ggplot(twdata, aes(x=dndmi)) + geom_histogram() 
+```
+
+
+
+```{r}
+ggplot(twdata, aes(x=rdnbr)) + geom_histogram() 
+```
+
+
+## Chelaslie
+```{r}
+ggplot(chdata, aes(x=ndviprefire)) + geom_histogram() 
+```
+
+
+```{r}
+ggplot(chdata, aes(x=elevation)) + geom_histogram() 
+```
+
+
+
+```{r}
+ggplot(chdata, aes(x=fwi)) + geom_histogram() 
+```
+
+
+```{r}
+ggplot(chdata, aes(x=dndmi)) + geom_histogram() 
+```
+
+
+
+```{r}
+ggplot(chdata, aes(x=rdnbr)) + geom_histogram() 
+```
+
+# Combine data
+
+```{r}
+
+endata1 = endata %>% 
+  dplyr::select(ASPTR:rdnbr) %>%
+  rename(org_rdnbr=EN_rdnbr) %>%
+  mutate(FireYr = 2012)
+endata1
+```
+
+```{r}
+
+twdata1 = twdata %>% 
+  dplyr::select(ASPTR:rdnbr) %>%
+  rename(org_rdnbr=TW_rdnbr) %>%
+  mutate(FireYr = 2013)
+twdata1
+```
+
+
+```{r}
+
+chdata1 = chdata %>% 
+  dplyr::select(ASPTR:rdnbr) %>%
+  rename(org_rdnbr=CH_rdnbr) %>%
+  mutate(FireYr = 2014)
+chdata1
+```
+
+
+```{r}
+df = bind_rows(endata1, twdata1, chdata1)
+df
+```
+
+
+```{r}
+summary(df)
+```
+
+```{r}
+df
+```
+
+## Visualize all
+
+```{r}
+ggplot(df, aes(x=ndviprefire)) + geom_histogram() 
+```
+
+
+```{r}
+ggplot(df, aes(x=elevation)) + geom_histogram() 
+```
+
+
+
+```{r}
+ggplot(df, aes(x=fwi)) + geom_histogram() 
+```
+
+
+```{r}
+ggplot(df, aes(x=dndmi)) + geom_histogram() 
+```
+
+
+
+```{r}
+ggplot(df, aes(x=rdnbr)) + geom_histogram() 
+```
+
+
+# Filter
+
+```{r}
+df1 = df  %>% 
+  filter(rdnbr %in% (-500:2000) )
+
+df1
+```
+
+
+
+# Add variables
+
+If the pixel burned as high severity, it’s a 1 (present); if thepixel burned as other it was absent, it’s a 0.
+
+```{r}
+df2 = df1 %>%
+  mutate(fwi_cat = ifelse(fwi<= 13, "benign",
+         ifelse(fwi<= 29, "moderate", "extreme"))) %>%
+  mutate(rdnbr_class = ifelse(rdnbr<= 641, 0, 1))
+
+df2
+
+```
+
+
+
+
+```{r}
+
+df2 %>% 
+  group_by(fwi_cat) %>%
+  count(rdnbr_class) 
+
+```
+
+```{r}
+str(df2)
+```
+
+
+# Write to csv
+```{r eval=FALSE, include=FALSE}
+write.csv(df2, '../outputs/CombinedData/CombineDataCat3FWI.csv', row.names = FALSE)
+```
