@@ -239,6 +239,26 @@ df2 %>%
 str(df2)
 ```
 
+```{r}
+df2 %>% 
+  count(FireYr)
+```
+
+```{r}
+df2 %>% 
+  count(fwi_cat)
+```
+
+```{r}
+df2 %>% 
+  group_by(fwi_cat) %>%
+  count(rdnbr_class)
+```
+
+```{r}
+df2 %>% 
+  count(rdnbr_class)
+```
 
 # Write to csv
 ```{r eval=FALSE, include=FALSE}

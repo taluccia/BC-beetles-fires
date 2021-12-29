@@ -240,6 +240,11 @@ write.csv(df3, '../outputs/CombinedData/CombineDataModExt.csv', row.names = FALS
 ```
 
 ```{r}
+df3 %>% 
+  count(FireYr)
+```
+
+```{r}
 
 df3 %>% 
   count(rdnbr_class) 
