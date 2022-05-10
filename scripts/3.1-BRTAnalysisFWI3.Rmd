@@ -10,23 +10,14 @@ output: html_document
 
 
 # Overview
-NEW SAMPLE!!!! Split FWI in to 3 categories
+Boosted Regression Tree models split by FWI into 3 categories
+
 ## Notes
-
-9-2-2019 Run wi sampling from updated gee code that should match the 5-15-2019 version.
-
-Final Models
-Full Model
-Simple Model
-
-
---Beetle vs. Fuels
 
 Boosted Regression Trees in R 
 Note: this is a cut-down version of a tutorial prepared by Jane Elith and John Leathwick
-Adapted by Chris Dunn for fire risk assessment
-Adapted by Garrett Meigs for analysis of fire refugia
-Complementary to Krawchuk et al. 2016 Ecosphere scripts
+
+Adapted from Garrett Meigs and Krawchuk et al. 2016 Ecosphere scripts
 
 
 
