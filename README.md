@@ -27,8 +27,6 @@ This repository host scripts for processing and sampling satellite imagery to ev
 * EnSamplingValues
 
 
-
-
 ## Spatial Data Availablity
 
 British Columbia [Fire Perimeters-Historical](https://catalogue.data.gov.bc.ca/dataset/fire-perimeters-historical) 
