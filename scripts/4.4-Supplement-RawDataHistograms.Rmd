@@ -1,0 +1,234 @@
+---
+title: "Raw Data Histograms"
+author: "Anna Talucci"
+date: "5/11/2022"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+Generate histograms for raw data figure in supplement materials
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+
+## Library
+```{r include=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+
+
+# Data
+```{r}
+endata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_EnSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
+twdata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_TWSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
+chdata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_ChSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+
+# Data Inspection
+```{r}
+summary(endata)
+```
+
+```{r}
+summary(twdata)
+```
+```{r}
+summary(chdata)
+```
+
+#  Visualize Data
+
+## Entiako
+```{r}
+ggplot(endata, aes(x=ndviprefire)) + geom_histogram() 
+```
+
+
+```{r}
+ggplot(endata, aes(x=elevation)) + geom_histogram() 
+```
+
+
+
+```{r}
+ggplot(endata, aes(x=fwi)) + geom_histogram() 
+```
+
+
+```{r}
+ggplot(endata, aes(x=dndmi)) + geom_histogram() 
+```
+
+
+
+```{r}
+ggplot(endata, aes(x=rdnbr)) + geom_histogram() 
+```
+
+## Tweeds
+```{r}
+ggplot(twdata, aes(x=ndviprefire)) + geom_histogram() 
+```
+
+
+```{r}
+ggplot(twdata, aes(x=elevation)) + geom_histogram() 
+```
+
+
+
+```{r}
+ggplot(twdata, aes(x=fwi)) + geom_histogram() 
+```
+
+
+```{r}
+ggplot(twdata, aes(x=dndmi)) + geom_histogram() 
+```
+
+
+
+```{r}
+ggplot(twdata, aes(x=rdnbr)) + geom_histogram() 
+```
+
+
+## Chelaslie
+```{r}
+ggplot(chdata, aes(x=ndviprefire)) + geom_histogram() 
+```
+
+
+```{r}
+ggplot(chdata, aes(x=elevation)) + geom_histogram() 
+```
+
+
+
+```{r}
+ggplot(chdata, aes(x=fwi)) + geom_histogram() 
+```
+
+
+```{r}
+ggplot(chdata, aes(x=dndmi)) + geom_histogram() 
+```
+
+
+
+```{r}
+ggplot(chdata, aes(x=rdnbr)) + geom_histogram() 
+```
+
+# Combine data
+
+```{r}
+
+endata1 = endata %>% 
+  dplyr::select(ASPTR:rdnbr) %>%
+  rename(org_rdnbr=EN_rdnbr) %>%
+  mutate(FireYr = 2012)
+endata1
+```
+
+```{r}
+
+twdata1 = twdata %>% 
+  dplyr::select(ASPTR:rdnbr) %>%
+  rename(org_rdnbr=TW_rdnbr) %>%
+  mutate(FireYr = 2013)
+twdata1
+```
+
+
+```{r}
+
+chdata1 = chdata %>% 
+  dplyr::select(ASPTR:rdnbr) %>%
+  rename(org_rdnbr=CH_rdnbr) %>%
+  mutate(FireYr = 2014)
+chdata1
+```
+
+
+```{r}
+df = bind_rows(endata1, twdata1, chdata1)
+df
+```
+
+
+```{r}
+summary(df)
+```
+
+```{r}
+df
+```
+
+# Histograms of data
+
+```{r}
+h1 = ggplot(df, aes(x=dndmi)) + geom_histogram(color="black", fill="white") +
+  xlab("dNDMI") +
+  theme_bw(base_size = 12) +
+                theme(plot.margin = unit(c(0.05, 0.2, 0.05, 0.5), "cm")) 
+```
+
+```{r}
+h2 = ggplot(df, aes(x=ndviprefire)) + geom_histogram(color="black", fill="white") +
+  xlab("NDVI") +
+  theme_bw(base_size = 12) +
+                theme(plot.margin = unit(c(0.05, 0.2, 0.05, 0.5), "cm")) 
+```
+
+```{r}
+h3 = ggplot(df, aes(x=fwi)) + geom_histogram(color="black", fill="white") +
+  xlab("FWI") +
+  theme_bw(base_size = 12) +
+                theme(plot.margin = unit(c(0.05, 0.2, 0.05, 0.5), "cm")) 
+```
+
+```{r}
+h4 = ggplot(df, aes(x=elevation)) + geom_histogram(color="black", fill="white") +
+  xlab("Elevation (m)") +
+  theme_bw(base_size = 12) +
+                theme(plot.margin = unit(c(0.05, 0.2, 0.05, 0.5), "cm")) 
+```
+
+```{r}
+h5 = ggplot(df, aes(x=rdnbr)) + geom_histogram(color="black", fill="white") +
+  xlab("RdNBR") +
+  theme_bw(base_size = 12) +
+                theme(plot.margin = unit(c(0.05, 0.2, 0.05, 0.5), "cm")) 
+```
+
+
+
+
+
+
+
+
+
+```{r fig.height=6, fig.width=6}
+( grid3 = cowplot::plot_grid(h1, h2, h4, h3, h5, labels = c("(a)", "(b)", "(c)", "(d)", "(e)"), label_fontface = 'plain', label_size = 12, align = "hv", ncol= 2) )
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/histograms.jpeg", plot = grid3, width = 6, height = 6, units = c("in"), dpi=600 )
+```
+
+**THE END**
