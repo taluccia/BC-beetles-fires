@@ -22,7 +22,9 @@ This repository host scripts for processing and sampling satellite imagery to ev
 
 ## Links to Googe Earth Engine Scripts
 
-
+* TwSamplingValues
+* ChSamplingValues
+* EnSamplingValues
 
 
 
