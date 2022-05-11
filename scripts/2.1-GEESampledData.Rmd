@@ -11,6 +11,9 @@ output: html_document
 rm(list=ls()) 
 ```
 
+# Overview
+
+Combine sample points from each fire from Google Earth Engine.
 
 ## Library
 ```{r include=FALSE}
