@@ -35,4 +35,4 @@ This repository host scripts for processing and sampling satellite imagery to ev
 ## Spatial Data Availablity
 
 * British Columbia [Fire Perimeters-Historical](https://catalogue.data.gov.bc.ca/dataset/fire-perimeters-historical) 
-* British Columbia [Vegetation Resource Index]()
+* British Columbia [Vegetation Resource Index](https://catalogue.data.gov.bc.ca/dataset/vri-historical-vegetation-resource-inventory-2002-2019-/resource/1026c384-27e5-49d7-b90d-4578c71abc64)
