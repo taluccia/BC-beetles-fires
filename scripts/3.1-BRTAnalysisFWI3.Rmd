@@ -148,6 +148,13 @@ save(brt.model1, file = "../outputs/BRTmodelsFWI3/BRT1_model.rda")
 load(file = "../outputs/BRTmodelsFWI3/BRT1_model.rda")
 ```
 
+### Get residuals
+```{r}
+model.data %>% 
+  mutate(res_full = brt.model1$residuals) %>% 
+  write.csv(., '../outputs/BRTModelsFWI3/BRT1_Residuals.csv', row.names = F)
+```
+
 ### Relative influence of predictors as part of summary gbm - for model assessment
 ```{r}
 relative.influence(brt.model1, scale=TRUE, sort=TRUE)
