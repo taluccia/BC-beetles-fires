@@ -1,0 +1,62 @@
+---
+title: "Spatial Autocorrelation"
+author: "Anna Talucci"
+date: "5/31/2022"
+output: html_document
+---
+
+
+
+# Load packages
+```{r message=FALSE, warning=FALSE}
+library(sp)
+library(gstat)
+library(purrr) # for looping
+library(ggplot2)
+library(dplyr) 
+library(ape)
+```
+
+# Data
+
+
+```{r}
+data_resid = read.csv("../outputs/BRTModelsFWI3/BRT1_Residuals.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+```{r}
+data_resid
+```
+
+```{r}
+head(data_resid)
+```
+
+```{r}
+data1 = data_resid %>% drop_na()
+data1
+```
+
+
+```{r}
+variogram1 = variogram(res_full~ndviprefire+dndmi+fwi+elevation, locations = ~LON+LAT, data = data_resid)
+
+
+variogram
+```
+
+
+```{r}
+TheVariogramModel1 <- vgm(psill=50000, model="Gau", nugget=0.001, range=2000)
+```
+
+
+```{r}
+
+FittedModel1 <- fit.variogram(variogram1, model=TheVariogramModel1)    
+plot(variogram1, model=FittedModel1)
+```
+
+
+
+
