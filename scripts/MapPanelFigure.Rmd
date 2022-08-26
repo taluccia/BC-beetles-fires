@@ -1,0 +1,107 @@
+---
+title: "Map Figure"
+author: "Anna Talucci"
+date: '2022-08-26'
+output: html_document
+---
+
+# Overview
+
+Map figure for ERL BC paper
+
+# Packages 
+```{r}
+library(terra)
+library(gdalUtilities)
+library(sf)
+library(tidyverse)
+library(tmap)
+```
+
+# Data
+
+## Polygons
+```{r}
+en_poly = st_read("../data/perimeters/R10171.shp", "R10171") 
+ch_poly = st_read("../data/perimeters/R10070.shp", "R10070")
+tw_poly = st_read("../data/perimeters/R10252.shp", "R10252")
+```
+
+## Rasters
+
+### FWI
+```{r}
+fwi_en<-rast("../data/fwi/2012-R10171_2012.rc1.tif")
+fwi_ch<-rast("../data/fwi/R10070_2014.rc1.tif")
+fwi_tw<-rast("../data/fwi/tw_fwi.tif")
+```
+
+### dNBR
+
+```{r}
+rdnbr_en<-rast("../data/GEE_layers_forMaps/en_layers/en_rdnbr.tif")
+rdnbr_ch<-rast("../data/GEE_layers_forMaps/ch_layers/ch_rdnbr.tif")
+rdnbr_tw<-rast("../data/GEE_layers_forMaps/tw_layers/tw_rdnbr.tif")
+```
+
+### Beetles
+
+```{r}
+dndmi_en<-rast("../data/GEE_layers_forMaps/en_layers/withdndmi.tif")
+dndmi_ch<-rast("../data/GEE_layers_forMaps/ch_layers/withdndmi.tif")
+dndmi_tw<-rast("../data/GEE_layers_forMaps/tw_layers/withdndmi.tif")
+```
+
+### ndvi
+
+```{r}
+ndvi_en<-rast("../data/GEE_layers_forMaps/en_layers/ndviprefire.tif")
+ndvi_ch<-rast("../data/GEE_layers_forMaps/ch_layers/ndviprefire.tif")
+ndvi_tw<-rast("../data/GEE_layers_forMaps/tw_layers/ndviprefire.tif")
+```
+
+#tmap
+
+## Polys
+```{r}
+map_en = tm_shape(en_poly) + tm_polygons()
+```
+
+```{r}
+map_ch = tm_shape(ch_poly) + tm_polygons()
+```
+
+```{r}
+map_tw = tm_shape(tw_poly) + tm_polygons()
+```
+
+## FWI Rasters
+
+```{r}
+breaks = c(0, 13, 27, 50)
+```
+
+
+```{r}
+map_en1 = map_en + tm_shape(fwi_en) + tm_raster(alpha = 0.7, legend.show = FALSE)
+map_en1
+```
+
+```{r}
+map_ch1 = map_ch +
+  tm_shape(fwi_ch) + tm_raster(alpha = 0.7, legend.show = FALSE)
+```
+
+
+```{r}
+map_tw1 = map_tw +
+  tm_shape(fwi_tw) + tm_raster(alpha = 0.7, title = "FWI", breaks = breaks)
+```
+
+```{r}
+tmap_arrange(map_en1, map_tw1, map_ch1)
+
+```
+
+
+**THE END**
