@@ -1,0 +1,122 @@
+---
+title: "Perimeter overlap"
+author: "Anna Talucci"
+date: '2022-08-30'
+output: html_document
+---
+
+# Overview
+
+Sample points and perimeter overlap 
+
+# Packages 
+```{r}
+library(terra)
+library(gdalUtilities)
+library(sf)
+library(tidyverse)
+library(tmap)
+library(raster)
+```
+
+# Projections
+
+WGS 84 need for gee
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+```
+
+```{r}
+zone10_proj =  "+proj=utm +zone=10 +datum=WGS84 +units=m +no_defs +type=crs"
+```
+
+# Data
+
+## Polygons
+
+```{r}
+en_poly = st_read("../data/perimeters/R10171.shp", "R10171") 
+ch_poly = st_read("../data/perimeters/R10070.shp", "R10070")
+```
+
+```{r}
+en_forest = st_read("../data/perimeters-forest-only/en_R10171_2012_Forestonly.shp", "en_R10171_2012_Forestonly")
+ch_forest = st_read("../data/perimeters-forest-only/ch_R10070_2014_Forestonly.shp", "ch_R10070_2014_Forestonly") 
+```
+```{r}
+enzone10 = st_transform(en_poly, crs = zone10_proj)
+chzone10 = st_transform(ch_poly, crs = zone10_proj)
+```
+
+```{r}
+en_buffer = st_buffer(enzone10, dist=150)
+```
+# sample
+
+```{r}
+ch_sample = read.csv("../data/2.1-GEE-Sampled/2021-06-07_ChSampledValues.csv")
+```
+
+```{r}
+head(ch_sample)
+```
+
+# Define coordinates and generate spatial point data frame with attributes
+```{r}
+sample_locations <- st_as_sf(ch_sample, coords = c("LON", "LAT"), crs = wgs_proj)
+```
+
+```{r}
+sample_utm = st_transform(sample_locations, crs = zone10_proj)
+```
+
+```{r}
+sample_utm
+```
+
+
+```{r}
+plot(st_geometry((sample_utm)))
+```
+
+```{r}
+plot(st_geometry(chzone10))
+plot(st_geometry(enzone10), add=TRUE)
+```
+
+```{r}
+perimeter_overlap = st_intersection(st_geometry(chzone10), st_geometry(enzone10))
+```
+```{r}
+plot(perimeter_overlap)
+``` 
+```{r}
+sample_overlap = st_intersection(st_geometry(sample_utm), st_geometry(perimeter_overlap))
+```
+
+```{r}
+plot(st_geometry((sample_overlap)))
+```
+
+```{r}
+remove_overlap = st_difference(sample_utm, en_buffer) 
+
+```
+
+```{r}
+
+plot(st_geometry(enzone10))
+plot(st_geometry((remove_overlap)), add=TRUE)
+```
+
+```{r}
+remove_overlap
+```
+
+# Remove geometry and write attributes to CSV
+```{r eval=FALSE, include=FALSE}
+remove_overlap %>% 
+  st_set_geometry(NULL) %>% 
+        write.csv(., '../outputs/2021-06-07_ChSampledValuesRemoveOverlap.csv',  row.names = FALSE)
+  
+```
