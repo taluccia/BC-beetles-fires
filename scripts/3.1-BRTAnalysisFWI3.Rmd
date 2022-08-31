@@ -35,9 +35,9 @@ library(devtools)
 library(gbm)
 library(foreign)
 library(dismo)
-library(dplyr)
+library(tidyverse)
 library(splines)
-library(ggplot2)
+
 ```
 
 ## BRT functions 
@@ -141,18 +141,18 @@ ntree_opt_cv = gbm.perf(brt.model1, method = "cv")
 ### Save model outputs as external object for mapping later or posterity
 
 ```{r}
-save(brt.model1, file = "../outputs/BRTmodelsFWI3/BRT1_model.rda")
+save(brt.model1, file = "../outputs/BRTmodelsFWI3_v2/BRT1_model.rda")
 ```
 
 ```{r eval=FALSE, include=FALSE}
-load(file = "../outputs/BRTmodelsFWI3/BRT1_model.rda")
+load(file = "../outputs/BRTmodelsFWI3_v2/BRT1_model.rda")
 ```
 
 ### Get residuals
 ```{r}
 model.data %>% 
   mutate(res_full = brt.model1$residuals) %>% 
-  write.csv(., '../outputs/BRTModelsFWI3/BRT1_Residuals.csv', row.names = F)
+  write.csv(., '../outputs/BRTmodelsFWI3_v2/BRT1_Residuals.csv', row.names = F)
 ```
 
 ### Relative influence of predictors as part of summary gbm - for model assessment
@@ -165,19 +165,37 @@ Notes: permutation.test.gbm(brt.model, n.trees=brt.model$n.trees); This method r
 ### Plotting (Anna Added)
 ```{r}
 gbm.plot(brt.model1, smooth=TRUE, write.title = TRUE, y.label="Fitted function", x.label="")
-dev.print(pdf, "../outputs/BRTmodelsFWI3/BRT1_plots.pdf")
+dev.print(pdf, "../outputs/BRTmodelsFWI3_v2/BRT1_plots.pdf")
 dev.off()
 ```
 ```{r}
 gbm.plot.fits(brt.model1)
-dev.print(pdf, "../outputs/BRTmodelsFWI3/BRT1_fits.pdf")
+dev.print(pdf, "../outputs/BRTmodelsFWI3_v2/BRT1_fits.pdf")
 dev.off()
 ```
-
+### Interactions
 ```{r}
 find.int = gbm.interactions(brt.model1)
 find.int$rank.list
 find.int$interactions
+```
+```{r}
+interact.gbm(brt.model1, data_full, i.var=c("dndmi", "elevation"), n.trees = brt.model1$n.trees)
+```
+```{r}
+interact.gbm(brt.model1, data_full, i.var=c("fwi", "ndviprefire"), n.trees = brt.model1$n.trees)
+```
+```{r}
+interact.gbm(brt.model1, data_full, i.var=c("elevation", "ndviprefire"), n.trees = brt.model1$n.trees)
+```
+```{r}
+interact.gbm(brt.model1, data_full, i.var=c("elevation", "fwi"), n.trees = brt.model1$n.trees)
+```
+```{r}
+interact.gbm(brt.model1, data_full, i.var=c("dndmi", "fwi"), n.trees = brt.model1$n.trees)
+```
+```{r}
+interact.gbm(brt.model1, data_full, i.var=c("dndmi", "ndviprefire"), n.trees = brt.model1$n.trees)
 ```
 
 
@@ -201,9 +219,9 @@ cv.discrim.mean=round(brt.model1$cv.statistics$discrimination.mean,2)
 
 ```{r}
 BRT.model1.sum=data.frame(tot.n, y.perc, brt.model1$n.trees, perc.dev.expl, roc.mean, cv.dev.mean, cv.cor.mean, cv.discrim.mean)
-write.csv(BRT.model1.sum, '../outputs/BRTmodelsFWI3/BRT1_sum.csv', row.names = F)
+write.csv(BRT.model1.sum, '../outputs/BRTmodelsFWI3_v2/BRT1_sum.csv', row.names = F)
 BRT.model1.relinf=data.frame(rel.inf, vnames)
-write.csv(BRT.model1.relinf, '../outputs/BRTmodelsFWI3/BRT1_relinf.csv', row.names = F)
+write.csv(BRT.model1.relinf, '../outputs/BRTmodelsFWI3_v2/BRT1_relinf.csv', row.names = F)
 ```
 
 ```{r}
@@ -258,11 +276,11 @@ summary(brt.model2,
 ### Save model outputs as external object for mapping later or posterity
 
 ```{r}
-save(brt.model2, file = "../outputs/BRTmodelsFWI3/BRT2_model.rda")
+save(brt.model2, file = "../outputs/BRTmodelsFWI3_v2/BRT2_model.rda")
 ```
 
 ```{r eval=FALSE, include=FALSE}
-load(file = "../outputs/BRTmodelsFWI3/BRT2_model.rda")
+load(file = "../outputs/BRTmodelsFWI3_v2/BRT2_model.rda")
 ```
 
 ### Relative influence of predictors as part of summary gbm - for model assessment
@@ -275,20 +293,41 @@ Notes: permutation.test.gbm(brt.model, n.trees=brt.model$n.trees); This method r
 ### Plotting (Anna Added)
 ```{r}
 gbm.plot(brt.model2, smooth=TRUE, write.title = FALSE)
-dev.print(pdf, "../outputs/BRTmodelsFWI3/BRT2_plots.pdf")
+dev.print(pdf, "../outputs/BRTmodelsFWI3_v2/BRT2_plots.pdf")
 dev.off()
 ```
 ```{r}
 gbm.plot.fits(brt.model2)
-dev.print(pdf, "../outputs/BRTmodelsFWI3/BRT2_fits.pdf")
+dev.print(pdf, "../outputs/BRTmodelsFWI3_v2/BRT2_fits.pdf")
 dev.off()
 ```
 
+### Interactions
 ```{r}
 find.int = gbm.interactions(brt.model2)
 find.int$rank.list
 find.int$interactions
 ```
+
+```{r}
+interact.gbm(brt.model2, data_ext, i.var=c("dndmi", "elevation"), n.trees = brt.model2$n.trees)
+```
+```{r}
+interact.gbm(brt.model2, data_ext, i.var=c("fwi", "ndviprefire"), n.trees = brt.model2$n.trees)
+```
+```{r}
+interact.gbm(brt.model2, data_ext, i.var=c("elevation", "ndviprefire"), n.trees = brt.model2$n.trees)
+```
+```{r}
+interact.gbm(brt.model2, data_ext, i.var=c("elevation", "fwi"), n.trees = brt.model2$n.trees)
+```
+```{r}
+interact.gbm(brt.model2, data_ext, i.var=c("dndmi", "fwi"), n.trees = brt.model2$n.trees)
+```
+```{r}
+interact.gbm(brt.model2, data_ext, i.var=c("dndmi", "ndviprefire"), n.trees = brt.model2$n.trees)
+```
+
 
 ## Calculate outputs stats 
 - Sandra Haire calculations and file export below from Krawchuk et al. (2016) Ecosphere
@@ -307,9 +346,9 @@ cv.discrim.mean=round(brt.model2$cv.statistics$discrimination.mean,2)
 
 ```{r}
 BRT.model2.sum=data.frame(tot.n, y.perc, brt.model2$n.trees, perc.dev.expl, roc.mean, cv.dev.mean, cv.cor.mean, cv.discrim.mean)
-write.csv(BRT.model2.sum, '../outputs/BRTmodelsFWI3/BRT2_sum.csv', row.names = F)
+write.csv(BRT.model2.sum, '../outputs/BRTmodelsFWI3_v2/BRT2_sum.csv', row.names = F)
 BRT.model2.relinf=data.frame(rel.inf, vnames)
-write.csv(BRT.model2.relinf, '../outputs/BRTmodelsFWI3/BRT2_relinf.csv', row.names = F)
+write.csv(BRT.model2.relinf, '../outputs/BRTmodelsFWI3_v2/BRT2_relinf.csv', row.names = F)
 ```
 
 ```{r}
@@ -350,11 +389,11 @@ summary(brt.model3,
 ### Save model outputs as external object for mapping later or posterity
 
 ```{r}
-save(brt.model3, file = "../outputs/BRTmodelsFWI3/BRT3_model.rda")
+save(brt.model3, file = "../outputs/BRTmodelsFWI3_v2/BRT3_model.rda")
 ```
 
 ```{r eval=FALSE, include=FALSE}
-load(file = "../outputs/BRTmodelsFWI3/BRT3_model.rda")
+load(file = "../outputs/BRTmodelsFWI3_v2/BRT3_model.rda")
 ```
 
 ### Relative influence of predictors as part of summary gbm - for model assessment
@@ -367,12 +406,12 @@ Notes: permutation.test.gbm(brt.model, n.trees=brt.model$n.trees); This method r
 ### Plotting (Anna Added)
 ```{r}
 gbm.plot(brt.model3, smooth=TRUE, write.title = FALSE)
-dev.print(pdf, "../outputs/BRTmodelsFWI3/BRT3_plots.pdf")
+dev.print(pdf, "../outputs/BRTmodelsFWI3_v2/BRT3_plots.pdf")
 dev.off()
 ```
 ```{r}
 gbm.plot.fits(brt.model3)
-dev.print(pdf, "../outputs/BRTmodelsFWI3/BRT3_fits.pdf")
+dev.print(pdf, "../outputs/BRTmodelsFWI3_v2/BRT3_fits.pdf")
 dev.off()
 ```
 
@@ -381,7 +420,34 @@ find.int = gbm.interactions(brt.model3)
 find.int$rank.list
 find.int$interactions
 ```
+```{r}
 
+interact.gbm(brt.model3, data_mod, i.var=c("dndmi", "elevation"), n.trees = brt.model3$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model3, data_mod, i.var=c("fwi", "ndviprefire"), n.trees = brt.model3$n.trees)
+```
+```{r}
+
+interact.gbm(brt.model3, data_mod, i.var=c("elevation", "ndviprefire"), n.trees = brt.model3$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model3, data_mod, i.var=c("elevation", "fwi"), n.trees = brt.model3$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model3, data_mod, i.var=c("dndmi", "fwi"), n.trees = brt.model3$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model3, data_mod, i.var=c("dndmi", "ndviprefire"), n.trees = brt.model3$n.trees)
+```
 ## Calculate outputs stats 
 - Sandra Haire calculations and file export below from Krawchuk et al. (2016) Ecosphere
 Note that these calculatins are not the same as the default outputs from the BRT code.
@@ -399,9 +465,9 @@ cv.discrim.mean=round(brt.model3$cv.statistics$discrimination.mean,2)
 
 ```{r}
 BRT.model3.sum=data.frame(tot.n, y.perc, brt.model3$n.trees, perc.dev.expl, roc.mean, cv.dev.mean, cv.cor.mean, cv.discrim.mean)
-write.csv(BRT.model3.sum, '../outputs/BRTmodelsFWI3/BRT3_sum.csv', row.names = F)
+write.csv(BRT.model3.sum, '../outputs/BRTmodelsFWI3_v2/BRT3_sum.csv', row.names = F)
 BRT.model3.relinf=data.frame(rel.inf, vnames)
-write.csv(BRT.model3.relinf, '../outputs/BRTmodelsFWI3/BRT3_relinf.csv', row.names = F)
+write.csv(BRT.model3.relinf, '../outputs/BRTmodelsFWI3_v2/BRT3_relinf.csv', row.names = F)
 ```
 
 ```{r}
@@ -442,11 +508,11 @@ summary(brt.model4,
 ### Save model outputs as external object for mapping later or posterity
 
 ```{r}
-save(brt.model4, file = "../outputs/BRTmodelsFWI3/BRT4_model.rda")
+save(brt.model4, file = "../outputs/BRTmodelsFWI3_v2/BRT4_model.rda")
 ```
 
 ```{r eval=FALSE, include=FALSE}
-load(file = "../outputs/BRTmodelsFWI3/BRT4_model.rda")
+load(file = "../outputs/BRTmodelsFWI3_v2/BRT4_model.rda")
 ```
 
 ### Relative influence of predictors as part of summary gbm - for model assessment
@@ -459,21 +525,51 @@ Notes: permutation.test.gbm(brt.model, n.trees=brt.model$n.trees); This method r
 ### Plotting (Anna Added)
 ```{r}
 gbm.plot(brt.model4, smooth=TRUE, write.title = FALSE)
-dev.print(pdf, "../outputs/BRTmodelsFWI3/BRT4_plots.pdf")
+dev.print(pdf, "../outputs/BRTmodelsFWI3_v2/BRT4_plots.pdf")
 dev.off()
 ```
 ```{r}
 gbm.plot.fits(brt.model4)
-dev.print(pdf, "../outputs/BRTmodelsFWI3/BRT4_fits.pdf")
+dev.print(pdf, "../outputs/BRTmodelsFWI3_v2/BRT4_fits.pdf")
 dev.off()
 ```
 
+### Interactions
 ```{r}
 find.int = gbm.interactions(brt.model4)
+find.int
 find.int$rank.list
 find.int$interactions
 ```
+"fwi", "ndviprefire"
+```{r}
 
+interact.gbm(brt.model4, data_ben, i.var=c("dndmi", "elevation"), n.trees = brt.model4$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model4, data_ben, i.var=c("fwi", "ndviprefire"), n.trees = brt.model4$n.trees)
+```
+```{r}
+
+interact.gbm(brt.model4, data_ben, i.var=c("elevation", "ndviprefire"), n.trees = brt.model4$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model4, data_ben, i.var=c("elevation", "fwi"), n.trees = brt.model4$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model4, data_ben, i.var=c("dndmi", "fwi"), n.trees = brt.model4$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model4, data_ben, i.var=c("dndmi", "ndviprefire"), n.trees = brt.model4$n.trees)
+```
 ## Calculate outputs stats 
 - Sandra Haire calculations and file export below from Krawchuk et al. (2016) Ecosphere
 Note that these calculatins are not the same as the default outputs from the BRT code.
@@ -491,9 +587,9 @@ cv.discrim.mean=round(brt.model4$cv.statistics$discrimination.mean,2)
 
 ```{r}
 BRT.model4.sum=data.frame(tot.n, y.perc, brt.model4$n.trees, perc.dev.expl, roc.mean, cv.dev.mean, cv.cor.mean, cv.discrim.mean)
-write.csv(BRT.model4.sum, '../outputs/BRTmodelsFWI3/BRT4_sum.csv', row.names = F)
+write.csv(BRT.model4.sum, '../outputs/BRTmodelsFWI3_v2/BRT4_sum.csv', row.names = F)
 BRT.model4.relinf=data.frame(rel.inf, vnames)
-write.csv(BRT.model4.relinf, '../outputs/BRTmodelsFWI3/BRT4_relinf.csv', row.names = F)
+write.csv(BRT.model4.relinf, '../outputs/BRTmodelsFWI3_v2/BRT4_relinf.csv', row.names = F)
 ```
 
 ```{r}
