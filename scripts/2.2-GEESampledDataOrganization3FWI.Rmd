@@ -25,7 +25,7 @@ library(ggplot2)
 ```{r}
 endata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_EnSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
 twdata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_TWSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
-chdata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_ChSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
+chdata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_ChSampledValuesRemoveOverlap.csv", header=TRUE, sep = ",", strip.white = TRUE)
 ```
 
 
