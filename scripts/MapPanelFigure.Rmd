@@ -16,11 +16,18 @@ library(gdalUtilities)
 library(sf)
 library(tidyverse)
 library(tmap)
+library(raster)
 ```
 
 # Data
 
 ## Polygons
+```{r}
+ch_forest = st_read("../data/perimeters-forest-only/ch_R10070_2014_Forestonly.shp", "ch_R10070_2014_Forestonly") 
+en_forest = st_read("../data/perimeters-forest-only/en_R10171_2012_Forestonly.shp", "en_R10171_2012_Forestonly")
+tw_forest = st_read("../data/perimeters-forest-only/tw_R10252_2013_Forestonly.shp", "tw_R10252_2013_Forestonly")
+```
+
 ```{r}
 en_poly = st_read("../data/perimeters/R10171.shp", "R10171") 
 ch_poly = st_read("../data/perimeters/R10070.shp", "R10070")
@@ -36,29 +43,104 @@ fwi_ch<-rast("../data/fwi/R10070_2014.rc1.tif")
 fwi_tw<-rast("../data/fwi/tw_fwi.tif")
 ```
 
+```{r}
+fwi_en
+```
+
 ### dNBR
 
 ```{r}
-rdnbr_en<-rast("../data/GEE_layers_forMaps/en_layers/en_rdnbr.tif")
-rdnbr_ch<-rast("../data/GEE_layers_forMaps/ch_layers/ch_rdnbr.tif")
-rdnbr_tw<-rast("../data/GEE_layers_forMaps/tw_layers/tw_rdnbr.tif")
+rdnbr_en<-raster("../data/GEE_layers_forMaps/en_layers/en_rdnbr.tif")
+rdnbr_ch<-raster("../data/GEE_layers_forMaps/ch_layers/ch_rdnbr.tif")
+rdnbr_tw<-raster("../data/GEE_layers_forMaps/tw_layers/tw_rdnbr.tif")
 ```
 
 ### Beetles
 
 ```{r}
-dndmi_en<-rast("../data/GEE_layers_forMaps/en_layers/withdndmi.tif")
-dndmi_ch<-rast("../data/GEE_layers_forMaps/ch_layers/withdndmi.tif")
-dndmi_tw<-rast("../data/GEE_layers_forMaps/tw_layers/withdndmi.tif")
+dndmi_en<-raster("../data/GEE_layers_forMaps/en_layers/withdndmi.tif")
+dndmi_ch<-raster("../data/GEE_layers_forMaps/ch_layers/withdndmi.tif")
+dndmi_tw<-raster("../data/GEE_layers_forMaps/tw_layers/withdndmi.tif")
 ```
 
+```{r}
+plot(dndmi_tw)
+```
 ### ndvi
 
 ```{r}
-ndvi_en<-rast("../data/GEE_layers_forMaps/en_layers/ndviprefire.tif")
-ndvi_ch<-rast("../data/GEE_layers_forMaps/ch_layers/ndviprefire.tif")
-ndvi_tw<-rast("../data/GEE_layers_forMaps/tw_layers/ndviprefire.tif")
+ndvi_en<-raster("../data/GEE_layers_forMaps/en_layers/ndviprefire.tif")
+ndvi_ch<-raster("../data/GEE_layers_forMaps/ch_layers/ndviprefire.tif")
+ndvi_tw<-raster("../data/GEE_layers_forMaps/tw_layers/ndviprefire.tif")
 ```
+
+```{r}
+ndvi_en
+```
+# Projection
+
+```{r}
+zone10 = "+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+zone9  = "+proj=utm +zone=9 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+```
+
+# Reproject Raster to UTM
+
+```{r}
+en_fwizone10 = project(fwi_en, zone10)
+```
+
+# Reporject polygons to UTM
+
+```{r}
+en_polyzone10 = st_transform(en_poly, crs = zone10)
+ch_polyzone10 = st_transform(ch_poly, crs = zone10)
+tw_polyzone9 = st_transform(tw_poly, crs = zone9)
+```
+
+```{r}
+en_forestzone10 = st_transform(en_forest, crs = zone10)
+ch_forestzone10 = st_transform(ch_forest, crs = zone10)
+tw_forestzone9 = st_transform(tw_forest, crs = zone9)
+```
+
+# Multipoly to poly
+
+```{r}
+en_zone10 <- st_cast(en_forestzone10$geometry, "POLYGON") %>% st_as_sf(.)
+```
+
+```{r}
+ch_zone10 <- st_cast(ch_forestzone10$geometry, "POLYGON") %>% st_as_sf(.)
+tw_zone9 <- st_cast(tw_forestzone9$geometry, "POLYGON") %>% st_as_sf(.)
+```
+
+# Crop
+
+## NDVI
+```{r}
+mask_ndvi_en = raster::mask(ndvi_en, st_geometry(en_forest))
+```
+
+```{r}
+mask_ndvi_ch = raster::mask(ndvi_ch, st_geometry(ch_zone10))
+mask_ndvi_tw = raster::mask(ndvi_tw, st_geometry(tw_zone9))
+```
+
+## dNDMI
+
+```{r}
+mask_dndmi_en = raster::mask(dndmi_en, en_polyzone10)
+mask_dndmi_ch = raster::mask(dndmi_ch, ch_polyzone10)
+mask_dndmi_tw = raster::mask(dndmi_tw, tw_polyzone9)
+```
+
+```{r}
+mask_rdnbr_en = raster::mask(rdnbr_en, en_polyzone10)
+mask_rdnbr_ch = raster::mask(rdnbr_ch, ch_polyzone10)
+mask_rdnbr_tw = raster::mask(rdnbr_tw, tw_polyzone9)
+```
+
 
 #tmap
 
@@ -75,31 +157,136 @@ map_ch = tm_shape(ch_poly) + tm_polygons()
 map_tw = tm_shape(tw_poly) + tm_polygons()
 ```
 
-## FWI Rasters
-
+## Bounding Box
 ```{r}
-breaks = c(0, 13, 27, 50)
+bbox_new <- st_bbox(tw_poly) # current bounding box
+
+xrange <- bbox_new$xmax - bbox_new$xmin # range of x values
+yrange <- bbox_new$ymax - bbox_new$ymin # range of y values
+
+# bbox_new[1] <- bbox_new[1] - (0.5 * xrange) # xmin - left
+bbox_new[3] <- bbox_new[3] + (0.5 * xrange) # xmax - right
+# bbox_new[2] <- bbox_new[2] - (0.5 * yrange) # ymin - bottom
+#  bbox_new[4] <- bbox_new[4] + (0.5 * yrange) # ymax - top
+
+bbox_new <- bbox_new %>%  # take the bounding box ...
+  st_as_sfc() # ... and make it a sf polygon
 ```
 
 
+## Breaks
+
 ```{r}
-map_en1 = map_en + tm_shape(fwi_en) + tm_raster(alpha = 0.7, legend.show = FALSE)
-map_en1
+breaks_fwi = c(0, 13, 27, 50)
+breaks_ndvi = c(0, 0.4, 0.6, 0.7, 0.8, 1)
+breaks_dndmi = c(-100, 0, 100, 200, 600)
+breaks_rdnbr = c(0, 641, 1500)
+```
+
+## dNDMI
+
+## aesthetics
+```{r}
+beetle_legend = tm_raster(palette = "BrBG",  breaks = breaks_dndmi, title = "FWI") + tm_layout(frame.lwd=2, frame = FALSE)
 ```
 
 ```{r}
-map_ch1 = map_ch +
-  tm_shape(fwi_ch) + tm_raster(alpha = 0.7, legend.show = FALSE)
+beetle_nolegend = tm_raster( palette = "BrBG", breaks = breaks_dndmi, legend.show = FALSE) + tm_layout(frame.lwd=2, frame = FALSE)
+```
+
+### maps
+```{r}
+map_en1 = map_en + tm_shape(mask_dndmi_en) + beetle_nolegend 
+
+map_ch1 = map_ch + tm_shape(mask_dndmi_ch) + beetle_nolegend 
+
+map_tw1 = map_tw + tm_shape(mask_dndmi_tw) + beetle_legend 
+```
+
+### gridded
+```{r}
+tmap_arrange(map_en1, map_tw1, map_ch1, nrow = 1, widths = .3, heights = .3)
+
 ```
 
 
+## NDVI
+
+### aethestics
 ```{r}
-map_tw1 = map_tw +
-  tm_shape(fwi_tw) + tm_raster(alpha = 0.7, title = "FWI", breaks = breaks)
+ndvi_legend = tm_raster(style = "cont", palette = "Greens", breaks=breaks_ndvi, interval.closure = "left", title = "NDVI") + tm_layout(frame.lwd=2, frame = FALSE)
 ```
 
 ```{r}
-tmap_arrange(map_en1, map_tw1, map_ch1)
+ndvi_nolegend = tm_raster(style = "cont", palette = "Greens", breaks=breaks_ndvi, interval.closure = "left", legend.show = FALSE) + tm_layout(frame.lwd=2, frame = FALSE)
+```
+
+### maps
+```{r}
+map_en2 = map_en + tm_shape(mask_ndvi_en) + ndvi_nolegend
+
+map_ch2 = map_ch + tm_shape(mask_ndvi_ch) + ndvi_nolegend
+
+map_tw2 = map_tw + tm_shape(mask_ndvi_tw) + ndvi_legend
+```
+
+### gridded
+```{r}
+tmap_arrange(map_en2, map_tw2, map_ch2, nrow = 1, widths = .3, heights = .3)
+```
+
+## FWI
+
+### aestheitcs
+```{r}
+fwi_legend = tm_raster(alpha = 0.7, breaks = breaks_fwi, title = "FWI") + tm_layout(frame.lwd=2, frame = FALSE)
+
+fwi_nolegend = tm_raster(alpha = 0.7,  breaks = breaks_fwi, legend.show = FALSE) + tm_layout(frame.lwd=2, frame = FALSE)
+```
+
+### Maps
+```{r}
+map_en3 = map_en + tm_shape(fwi_en) + fwi_nolegend
+
+map_ch3 = map_ch + tm_shape(fwi_ch) + fwi_nolegend
+
+map_tw3 = map_tw + tm_shape(fwi_tw) + fwi_legend 
+```
+
+### gridded
+```{r}
+tmap_arrange(map_en3, map_tw3, map_ch3, nrow = 1, widths = .3, heights = .3)
+```
+
+## RdNBR
+
+### Aethetics
+```{r}
+rdnbr_legend = tm_raster(alpha = 0.7, breaks = breaks_rdnbr, title = "RdNBR") + 
+  tm_layout(frame.lwd=2, frame = FALSE, legend.title.size = 1, legend.text.size = 0.6, legend.position = c("right","bottom"))
+
+rdnbr_nolegend = tm_raster(alpha = 0.7,  breaks = breaks_rdnbr, legend.show = FALSE) + 
+  tm_layout(frame.lwd=2, frame = FALSE)
+```
+
+### Maps
+```{r}
+map_en4 = map_en + tm_shape(mask_rdnbr_en) + rdnbr_legend
+
+map_ch4 = map_ch + tm_shape(mask_rdnbr_ch) + rdnbr_legend
+
+map_tw4 = map_tw + tm_shape(mask_rdnbr_tw, bbox = bbox_new) + rdnbr_legend
+```
+
+### gridded
+```{r fig.height=2, fig.width=6}
+tmap_arrange(map_en4, map_tw4, map_ch4, nrow = 1, widths = .25, heights = .25)
+
+```
+
+# All
+```{r fig.height=6, fig.width=6}
+tmap_arrange( map_en1, map_tw1, map_ch1, map_en2, map_tw2, map_ch2, map_en3, map_tw3, map_ch3, map_en4, map_tw4, map_ch4, nrow = 4, widths = .3, heights = .3)
 
 ```
 
