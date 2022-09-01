@@ -54,16 +54,16 @@ brt.model4   | benign      |
 # Load BRT Models 
 Load BRT models that are saved during the model as .Rda files in the working directory. Models are assembled and run in the script 'BRTAnalyses'
 ```{r}
-load(file = "../outputs/BRTmodelsFWI3/BRT1_model.rda")
+load(file = "../outputs/BRTmodelsFWI3_v2/BRT1_model.rda")
 brt.model1 = brt.model1
 
-load(file = "../outputs/BRTmodelsFWI3/BRT2_model.rda")
+load(file = "../outputs/BRTmodelsFWI3_v2/BRT2_model.rda")
 brt.model2 = brt.model2
 
-load(file = "../outputs/BRTmodelsFWI3/BRT3_model.rda")
+load(file = "../outputs/BRTmodelsFWI3_v2/BRT3_model.rda")
 brt.model3 = brt.model3
 
-load(file = "../outputs/BRTmodelsFWI3/BRT4_model.rda")
+load(file = "../outputs/BRTmodelsFWI3_v2/BRT4_model.rda")
 brt.model4 = brt.model4
 ```
 
@@ -307,6 +307,6 @@ grid_msplot
 
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/PartialPlot3FWI.tiff", plot = grid_msplot, width = 6, height =5.25, units = c("in"), dpi=600 )
+ggsave("../figures/PartialPlot3FWI_v2.tiff", plot = grid_msplot, width = 6, height =5.25, units = c("in"), dpi=600 )
 ```
 **THE END**
