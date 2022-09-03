@@ -1,0 +1,328 @@
+---
+title: "Interaction Effects"
+author: "Anna Talucci"
+date: '2022-09-02'
+output: html_document
+---
+
+
+
+# Load BRT Models 
+Load BRT models that are saved during the model as .Rda files in the working directory. Models are assembled and run in the script 'BRTAnalyses'
+```{r}
+load(file = "../outputs/BRTmodelsFWI3_v2/BRT1_model.rda")
+brt.model1 = brt.model1
+
+load(file = "../outputs/BRTmodelsFWI3_v2/BRT2_model.rda")
+brt.model2 = brt.model2
+
+load(file = "../outputs/BRTmodelsFWI3_v2/BRT3_model.rda")
+brt.model3 = brt.model3
+
+load(file = "../outputs/BRTmodelsFWI3_v2/BRT4_model.rda")
+brt.model4 = brt.model4
+```
+
+# Plot Themes
+```{r}
+bar_theme = theme_bw() + 
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+          axis.title.x = element_text(size = 9),
+        axis.text.x = element_text(size = 6, color = "black"),
+        axis.text.y = element_text(size = 6, color = "black"),
+        axis.line = element_line(colour = "black")) 
+```
+
+# Data
+# Data
+## Interaction table
+```{r}
+ie_data = read.csv("../data/Interactions/FWI3Split_v2_Interactions.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+## Model
+```{r}
+model.data = read.csv("../data/CombinedData/CombineDataCat3FWI.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+```{r}
+head(model.data)
+```
+
+## Select Columns 
+Select variable columns
+*  dndmi 
+*  elevation
+*  fwi 
+*  ndviprefire
+
+Mutate to add columns for classifying FWI and RdNBR
+FWI lo=1, hi=2 
+2 is anything greater then 29 and 1 is anything less than or equal to 29
+Rdnbr low = 0, high=1
+
+
+```{r}
+data_full = model.data %>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data_full
+```
+
+```{r}
+
+data_ben = model.data %>%
+  filter(fwi_cat == "benign") %>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data_ben
+```
+
+```{r}
+
+data_mod = model.data %>%
+  filter(fwi_cat == "moderate") %>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data_mod
+```
+
+
+```{r}
+
+data_ext= model.data %>%
+  filter(fwi_cat == "extreme") %>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire, rdnbr_class)
+data_ext
+```
+
+
+
+# Model 1
+
+
+```{r}
+find.int = gbm.interactions(brt.model1)
+find.int$rank.list
+find.int$interactions
+```
+
+## Pair Wise
+
+```{r}
+interact.gbm(brt.model1, data_full, i.var=c("dndmi", "elevation"), n.trees = brt.model1$n.trees)
+```
+```{r}
+interact.gbm(brt.model1, data_full, i.var=c("fwi", "ndviprefire"), n.trees = brt.model1$n.trees)
+```
+```{r}
+interact.gbm(brt.model1, data_full, i.var=c("elevation", "ndviprefire"), n.trees = brt.model1$n.trees)
+```
+```{r}
+interact.gbm(brt.model1, data_full, i.var=c("elevation", "fwi"), n.trees = brt.model1$n.trees)
+```
+```{r}
+interact.gbm(brt.model1, data_full, i.var=c("dndmi", "fwi"), n.trees = brt.model1$n.trees)
+```
+```{r}
+interact.gbm(brt.model1, data_full, i.var=c("dndmi", "ndviprefire"), n.trees = brt.model1$n.trees)
+```
+### All variable
+```{r}
+interact.gbm(brt.model1, data_mod, i.var=c("dndmi", "ndviprefire", "fwi", "elevation"), n.trees = brt.model1$n.trees)
+```
+
+
+# Model 2 Extreme
+```{r}
+find.int = gbm.interactions(brt.model2)
+find.int$rank.list
+find.int$interactions
+```
+
+### Pairwise
+```{r}
+interact.gbm(brt.model2, data_ext, i.var=c("dndmi", "elevation"), n.trees = brt.model2$n.trees)
+```
+```{r}
+interact.gbm(brt.model2, data_ext, i.var=c("fwi", "ndviprefire"), n.trees = brt.model2$n.trees)
+```
+```{r}
+interact.gbm(brt.model2, data_ext, i.var=c("elevation", "ndviprefire"), n.trees = brt.model2$n.trees)
+```
+```{r}
+interact.gbm(brt.model2, data_ext, i.var=c("elevation", "fwi"), n.trees = brt.model2$n.trees)
+```
+```{r}
+interact.gbm(brt.model2, data_ext, i.var=c("dndmi", "fwi"), n.trees = brt.model2$n.trees)
+```
+```{r}
+interact.gbm(brt.model2, data_ext, i.var=c("dndmi", "ndviprefire"), n.trees = brt.model2$n.trees)
+```
+### All variable
+```{r}
+interact.gbm(brt.model2, data_ext, i.var=c("dndmi", "ndviprefire", "fwi", "elevation"), n.trees = brt.model2$n.trees)
+```
+
+# Model 3 Moderate
+```{r}
+find.int = gbm.interactions(brt.model3)
+find.int$rank.list
+find.int$interactions
+```
+### Pairwise
+```{r}
+
+interact.gbm(brt.model3, data_mod, i.var=c("dndmi", "elevation"), n.trees = brt.model3$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model3, data_mod, i.var=c("fwi", "ndviprefire"), n.trees = brt.model3$n.trees)
+```
+```{r}
+
+interact.gbm(brt.model3, data_mod, i.var=c("elevation", "ndviprefire"), n.trees = brt.model3$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model3, data_mod, i.var=c("elevation", "fwi"), n.trees = brt.model3$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model3, data_mod, i.var=c("dndmi", "fwi"), n.trees = brt.model3$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model3, data_mod, i.var=c("dndmi", "ndviprefire"), n.trees = brt.model3$n.trees)
+```
+
+### All variable
+```{r}
+
+interact.gbm(brt.model3, data_mod, i.var=c("dndmi", "ndviprefire", "fwi", "elevation"), n.trees = brt.model3$n.trees)
+```
+
+# Model 4 
+```{r}
+find.int = gbm.interactions(brt.model4)
+find.int
+find.int$rank.list
+find.int$interactions
+```
+### Pairwise
+```{r}
+
+interact.gbm(brt.model4, data_ben, i.var=c("dndmi", "elevation"), n.trees = brt.model4$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model4, data_ben, i.var=c("fwi", "ndviprefire"), n.trees = brt.model4$n.trees)
+```
+```{r}
+
+interact.gbm(brt.model4, data_ben, i.var=c("elevation", "ndviprefire"), n.trees = brt.model4$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model4, data_ben, i.var=c("elevation", "fwi"), n.trees = brt.model4$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model4, data_ben, i.var=c("dndmi", "fwi"), n.trees = brt.model4$n.trees)
+```
+
+```{r}
+
+interact.gbm(brt.model4, data_ben, i.var=c("dndmi", "ndviprefire"), n.trees = brt.model4$n.trees)
+```
+
+### All varaibles
+```{r}
+
+interact.gbm(brt.model4, data_ben, i.var=c("dndmi", "ndviprefire", "fwi", "elevation"), n.trees = brt.model4$n.trees)
+```
+
+
+# Figure
+```{r}
+ie_data
+```
+```{r}
+as.factor(ie_data$weather)
+ie_data2 = ie_data %>% 
+  mutate(weather = factor(weather, levels=c("Benign", "Moderate", "Extreme", "Full"))) %>% drop_na(.)
+```
+
+```{r}
+ie_data3 <- na.omit(ie_data2)
+ie_data3
+```
+```{r}
+ggplot(ie_data2, aes(x = interaction, y = hstat,  fill = weather)) +
+  geom_segment(aes(x = interaction, xend = interaction, y = 0, yend = hstat),
+               color = "gray", lwd = 1) +
+  geom_point(size = 7.5, pch = 21, bg = 4, col = 1, ) +
+  geom_text(aes(label = hstat), color = "white", size = 3) +
+  scale_fill_manual(values = c("#999999", "#D55E00", "#F0E442", "#56B4E9"), name = "Model", breaks = c("Full", "Extreme", "Moderate", "Benign"), labels=c("Full", "Extreme", "Moderate", "Benign"), guide = guide_legend(reverse=FALSE))  +
+  coord_flip() +
+  theme_minimal()
+```
+
+```{r}
+shading <- data.frame(min = seq(from = 0.5, to = max(as.numeric(as.factor(ie_data2$interaction))), by = 1), max = seq(from = 1.5, to = max(as.numeric(as.factor(ie_data2$interaction))) + 0.5, by = 1), col = c(0,1))
+```
+## Plot
+```{r fig.height=4, fig.width=3}
+plot1 = ggplot(ie_data3) +
+    geom_linerange(aes(x = interaction, ymin = 0, ymax = hstat, colour = weather), 
+                   position = position_dodge(width = 1), show.legend = FALSE)+
+    geom_point(aes(x = interaction, y = hstat, colour = weather),
+               position = position_dodge(width = 1), size = 4) +
+  
+  geom_rect(data = shading, aes(xmin = min, xmax = max, ymin = -Inf, ymax = Inf, fill = factor(col), alpha = 0.1), show.legend = FALSE) +
+  scale_fill_manual(values = c("white", "gray90")) +
+  geom_linerange(aes(x = interaction, ymin = 0, ymax = hstat, colour = weather), 
+                   position = position_dodge(width = 1), show.legend = FALSE)+
+    geom_point(aes(x = interaction, y = hstat, colour = weather),
+               position = position_dodge(width = 1), size = 4) +
+  scale_colour_manual(values = c("#999999", "#D55E00", "#F0E442", "#56B4E9"), name = "Model", breaks = c("Full", "Extreme", "Moderate", "Benign"), labels=c("Full", "Extreme", "Moderate", "Benign"), guide = guide_legend(reverse=FALSE))  +
+    coord_flip() +
+    bar_theme +
+  ylab('Two-way interaction strength') +
+  scale_x_discrete(
+    "Explanatory Variables",
+    labels = c(
+      "FWI:NDVI Prefire" = "FWI:\nNDVI Prefire",
+      "FWI:Elevation" = "FWI:\nElevation",
+      "Elevation:NDVI Prefire" = "Elevation:\nNDVI Prefire",
+      "FWI:dNDMI" = "FWI:\ndNDMI",
+      "dNDMI:NDVI Prefire" = "dNDMI:\nNDVI Prefire",
+      "dNDMI:Elevation" = "dNDMI:\nElevation")) +
+ geom_text(data=ie_data3,aes(x=interaction,y=hstat, label=hstat, group=weather), size=1.5, position = position_dodge(width = 1)) +
+  theme(legend.position =c(.90, .08),
+              legend.title = element_text(size = 5),
+              legend.text = element_text(size = 4),
+        legend.key.size = unit(.05, "in"),
+        legend.background = element_rect(fill=alpha('white', 0.0))) +
+  guides(fill = guide_legend( ncol=1)) + 
+  guides(shape = guide_legend(override.aes = list(size = 0.5))) + 
+  guides(color = guide_legend(override.aes = list(size = 0.5)))
+ 
+ 
+plot1
+```
+
+
+
+   #geom_label(data=ie_data3, aes(x=interaction, y=hstat, label = hstat, colour = weather), colour = "gray", nudge_x = 0.35, size = 3, position = position_dodge(width = 1))
+
+
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/TwoWayInteraction3FWI_v2.tiff", plot = plot1, width = 3, height =4, units = c("in"), dpi=600 )
+```
