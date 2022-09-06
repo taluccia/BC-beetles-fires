@@ -33,10 +33,10 @@ bar_theme = theme_bw() +
 
 
 ```{r}
-model1 = read.csv("../outputs/BRTmodelsFWI3/BRT1_relinf.csv") 
-model2 = read.csv("../outputs/BRTmodelsFWI3/BRT2_relinf.csv") 
-model3 = read.csv("../outputs/BRTmodelsFWI3/BRT3_relinf.csv") 
-model4 = read.csv("../outputs/BRTmodelsFWI3/BRT4_relinf.csv") 
+model1 = read.csv("../outputs/BRTmodelsFWI3_v2/BRT1_relinf.csv") 
+model2 = read.csv("../outputs/BRTmodelsFWI3_v2/BRT2_relinf.csv") 
+model3 = read.csv("../outputs/BRTmodelsFWI3_v2/BRT3_relinf.csv") 
+model4 = read.csv("../outputs/BRTmodelsFWI3_v2/BRT4_relinf.csv") 
 ```
 
 
@@ -62,7 +62,7 @@ allData = bind_rows(full, extreme, moderate, benign) %>%
 # Variabile Influence 
 
 
-```{r fig.height=4, fig.width=3.5}
+```{r fig.height=4, fig.width=3}
 varInfPlot = allData %>% ggplot(aes(x = forcats::fct_reorder(.f = vnames, 
                                       .x = rel.inf), 
              y = rel.inf, 
@@ -94,5 +94,5 @@ varInfPlot
 
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/RelativeInfluence3FWI.tiff", plot = varInfPlot, width = 3.5, height =4, units = c("in"), dpi=600 )
+ggsave("../figures/RelativeInfluence3FWI_v2.tiff", plot = varInfPlot, width = 3, height =4, units = c("in"), dpi=600 )
 ```
