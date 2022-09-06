@@ -1,0 +1,197 @@
+---
+title: "VRI"
+author: "Anna Talucci"
+date: '2022-09-05'
+output: html_document
+---
+
+# Library
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
+library(RColorBrewer)
+```
+
+
+
+
+# Fires Perimeters
+
+## Data
+```{r}
+fires = st_read("../data/PROT_HISTORICAL_FIRE_POLYS_SP/H_FIRE_PLY_polygon.shp", "H_FIRE_PLY_polygon") 
+```
+
+## Select Fires
+```{r}
+en_fire = fires %>%
+  filter(FIRE_YEAR>2011) %>%
+  filter(FIRE_YEAR<2015) %>%
+  filter(SIZE_HA>3000) %>%
+  filter(FIRE_NO=="R10171" )
+
+en_fire
+```
+
+```{r}
+tw_fire = fires %>%
+  filter(FIRE_YEAR>2011) %>%
+  filter(FIRE_YEAR<2015) %>%
+  filter(SIZE_HA>3000) %>%
+  filter(FIRE_NO=="R10252")
+
+tw_fire
+```
+
+```{r}
+ch_fire = fires %>%
+  filter(FIRE_YEAR>2011) %>%
+  filter(FIRE_YEAR<2015) %>%
+  filter(SIZE_HA>3000) %>%
+  filter(FIRE_NO=="R10070" )
+
+ch_fire
+```
+# VRI
+
+## Data
+```{r}
+ch_vri= st_read("../data/VRI1/Chelaslie_VRI.shp", "Chelaslie_VRI") 
+```
+
+```{r}
+en_vri= st_read("../data/VRI1/Entiako_VRI.shp", "Entiako_VRI") 
+```
+
+```{r}
+tw_vri= st_read("../data/VRI1/Tweeds_VRI.shp", "Tweeds_VRI") 
+```
+
+# Select Data
+
+```{r}
+head(en_vri)
+```
+
+```{r}
+unique(en_vri$SPECIES_CD)
+```
+# Select Pine
+```{r}
+en_pine = en_vri %>% filter(SPECIES_CD=="PL")
+ch_pine = ch_vri %>% filter(SPECIES_CD=="PL")
+tw_pine = tw_vri %>% filter(SPECIES_CD=="PL")
+```
+
+# Define Breaks
+```{r}
+my_breaks <- c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
+my_breaks1 <- c(40, 50, 60, 70, 80, 90, 100)
+my_breaks2 <- c(25, 50, 75, 100)
+```
+
+# Make Figures
+```{r}
+en_plot = ggplot() +
+  geom_sf(data = en_fire, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = en_pine,  aes(fill=SPECIES_PC), colour = NA) +
+  scale_fill_gradientn(colours=(brewer.pal(n = 4, name = "YlGn")),
+                       name="Percent Lodgepole Pine",
+                         na.value = "grey100", 
+                         breaks = my_breaks2, labels = my_breaks2, guides(fill = guide_legend(title.position = 'top'))) +
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme( legend.position = "none", 
+        legend.title = element_text(size = 10),
+        legend.title.align = 0.5,
+        legend.key.height = unit(.25, 'in'), 
+        legend.key.width = unit(.25, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_colourbar(title.position="top"))
+
+
+en_plot
+```
+
+
+```{r}
+ch_plot = ggplot() +
+  geom_sf(data = ch_fire, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = ch_pine,  aes(fill=SPECIES_PC), colour = NA) +
+  scale_fill_gradientn(colours=(brewer.pal(n = 4, name = "YlGn")),
+                       name="Percent Lodgepole Pine",
+                         na.value = "grey100", 
+                         breaks = my_breaks2, labels = my_breaks2) +
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.position="none", 
+        legend.title = element_text(size = 10),
+        legend.key.height = unit(.25, 'in'), 
+        legend.key.width = unit(.25, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_colourbar(title.position="top"))
+
+ch_plot
+```
+
+```{r}
+tw_plot = ggplot() +
+  geom_sf(data = tw_fire, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = tw_pine,  aes(fill=SPECIES_PC), colour = NA) +
+  scale_fill_gradientn(colours=(brewer.pal(n = 4, name = "YlGn")),
+                       name="Percent Lodgepole Pine",
+                         na.value = "grey100", 
+                         breaks = my_breaks2, labels = my_breaks2) +
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.position="bottom", 
+        legend.title = element_text(size = 10),
+        legend.key.height = unit(.25, 'in'), 
+        legend.key.width = unit(.25, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_colourbar(title.position="top"))
+
+
+tw_plot
+```
+
+# Grid plots
+
+```{r fig.height=3, fig.width=6}
+
+grid1 = plot_grid(en_plot, tw_plot, ch_plot, ncol=3) 
+
+grid1
+
+```
+
+
+```{r}
+ggsave("../figures/VRI-LodgepolePine.png", plot = grid1, width = 6, height = 3, units = c("in"),dpi = 600, bg = "white")
+```
