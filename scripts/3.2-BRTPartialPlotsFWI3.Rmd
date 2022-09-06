@@ -216,10 +216,11 @@ legBottom = ggplot(data = pred_mods4[[1]], aes(x = x, y = center_y, color = mode
   theme(legend.key.height = unit(.2, 'in'), 
         legend.key.width = unit(.3, 'in'),
         legend.background = element_rect(fill=alpha('white', 0.0)))  + 
-  guides(fill = guide_legend( ncol=1), 
+  guides(fill = guide_legend(ncol=1), 
          shape = guide_legend(override.aes = list(size = 0.4)), 
          color = guide_legend(override.aes = list(size = 0.4))) + 
         scale_x_continuous(labels = scales::format_format(scientific = FALSE)) +
+  guides(color=guide_legend(override.aes=list(fill=NA))) +
         #scale_x_continuous(labels = comma) +
         #ylim(-1.55, 1.55) +
         geom_hline(yintercept=0) +
@@ -307,6 +308,6 @@ grid_msplot
 
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/PartialPlot3FWI_v2.tiff", plot = grid_msplot, width = 6, height =5.25, units = c("in"), dpi=600 )
+ggsave("../figures/PartialPlot3FWI_v2.tiff", plot = grid_msplot, width = 6, height =5.25, units = c("in"), dpi=600, bg = "white" )
 ```
 **THE END**
