@@ -1,0 +1,584 @@
+---
+title: "AerialSurveyData"
+author: "Anna Talucci"
+date: '2022-09-04'
+output: html_document
+---
+
+# Library
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
+library(RColorBrewer)
+```
+
+
+
+
+# Fires Perimeters
+
+## Data
+```{r}
+fires = st_read("../data/PROT_HISTORICAL_FIRE_POLYS_SP/H_FIRE_PLY_polygon.shp", "H_FIRE_PLY_polygon") 
+```
+
+## Select Fires
+```{r}
+allFires = fires %>%
+  filter(FIRE_YEAR>2011) %>%
+  filter(FIRE_YEAR<2015) %>%
+  filter(SIZE_HA>3000) %>%
+  filter(FIRE_NO=="R10171" | FIRE_NO=="R10070" | FIRE_NO=="R10252")
+
+allFires 
+```
+
+
+
+# MPB by year
+
+## Data
+```{r}
+mpb1997= st_read("../data/mpb_poly_1997to2011/ibm_poly_1997.shp", "ibm_poly_1997") 
+```
+
+```{r}
+mpb1998= st_read("../data/mpb_poly_1997to2011/ibm_poly_1998.shp", "ibm_poly_1998") 
+```
+
+```{r}
+mpb1999= st_read("../data/mpb_poly_1997to2011/ibm_poly_1999.shp", "ibm_poly_1999") 
+```
+```{r}
+mpb2000= st_read("../data/mpb_poly_1997to2011/ibm_poly_2000.shp", "ibm_poly_2000") 
+```
+```{r}
+mpb2001= st_read("../data/mpb_poly_1997to2011/ibm_poly_2001.shp", "ibm_poly_2001") 
+```
+
+```{r}
+mpb2002= st_read("../data/mpb_poly_1997to2011/ibm_poly_2002.shp", "ibm_poly_2002") 
+```
+
+```{r}
+mpb2003= st_read("../data/mpb_poly_1997to2011/ibm_poly_2003.shp", "ibm_poly_2003") 
+```
+
+```{r}
+mpb2004= st_read("../data/mpb_poly_1997to2011/ibm_poly_2004.shp", "ibm_poly_2004") 
+```
+
+```{r}
+mpb2005= st_read("../data/mpb_poly_1997to2011/ibm_poly_2005.shp", "ibm_poly_2005") 
+```
+
+```{r}
+mpb2006= st_read("../data/mpb_poly_1997to2011/ibm_poly_2006.shp", "ibm_poly_2006") 
+```
+
+```{r}
+mpb2007= st_read("../data/mpb_poly_1997to2011/ibm_poly_2007.shp", "ibm_poly_2007") 
+```
+
+```{r}
+mpb2008= st_read("../data/mpb_poly_1997to2011/ibm_poly_2008.shp", "ibm_poly_2008") 
+```
+
+```{r}
+mpb2009= st_read("../data/mpb_poly_1997to2011/ibm_poly_2009.shp", "ibm_poly_2009") 
+```
+
+```{r}
+mpb2010= st_read("../data/mpb_poly_1997to2011/ibm_poly_2010.shp", "ibm_poly_2010") 
+```
+
+```{r}
+mpb2011= st_read("../data/mpb_poly_1997to2011/ibm_poly_2011.shp", "ibm_poly_2011") 
+```
+
+## Attributes
+```{r}
+head(mpb2001)
+head(mpb2005)
+```
+```{r}
+unique(mpb2001$SEVERITY)
+unique(mpb2005$SEVERITY)
+```
+## Clip
+```{r}
+clip1997 = st_intersection(st_make_valid(mpb1997), st_make_valid(st_combine(allFires)))
+```
+
+```{r}
+clip1998 = st_intersection(st_make_valid(mpb1998), st_make_valid(st_combine(allFires)))
+```
+
+```{r}
+clip1999 = st_intersection(st_make_valid(mpb1999), st_make_valid(st_combine(allFires)))
+```
+
+```{r}
+clip2000 = st_intersection(st_make_valid(mpb2000), st_make_valid(st_combine(allFires)))
+```
+
+```{r}
+clip2001 = st_intersection(st_make_valid(mpb2001), st_make_valid(st_combine(allFires)))
+```
+
+```{r}
+clip2002 = st_intersection(st_make_valid(mpb2002), st_make_valid(st_combine(allFires)))
+```
+
+```{r}
+clip2003 = st_intersection(st_make_valid(mpb2003), st_make_valid(st_combine(allFires)))
+```
+
+```{r}
+clip2004 = st_intersection(st_make_valid(mpb2004), st_make_valid(st_combine(allFires)))
+```
+
+```{r}
+clip2005 = st_intersection(st_make_valid(mpb2005), st_make_valid(st_combine(allFires)))
+```
+
+```{r}
+clip2006 = st_intersection(st_make_valid(mpb2006), st_make_valid(st_combine(allFires)))
+```
+
+```{r}
+clip2007 = st_intersection(st_make_valid(mpb2007), st_make_valid(st_combine(allFires)))
+```
+
+
+```{r}
+clip2008 = st_intersection(st_make_valid(mpb2008), st_make_valid(st_combine(allFires)))
+```
+
+```{r}
+clip2009 = st_intersection(st_make_valid(mpb2009), st_make_valid(st_combine(allFires)))
+```
+
+```{r}
+clip2010 = st_intersection(st_make_valid(mpb2010), st_make_valid(st_combine(allFires)))
+```
+
+```{r}
+clip2011 = st_intersection(st_make_valid(mpb2011), st_make_valid(st_combine(allFires)))
+```
+
+# Plot to check
+
+```{r}
+plot(st_geometry(allFires))
+plot(st_geometry(clip2001), add=TRUE)
+```
+
+
+# Figure
+```{r}
+plot1997 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip1997,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 4, name = "Spectral")), labels = c("L", "M", "S", "X")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "1997") 
+
+```
+
+```{r}
+plot1998 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip1998,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 4, name = "Spectral")), labels = c("L", "M", "S", "X")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "1998") 
+
+
+
+```
+
+```{r}
+plot1999 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip1999,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 4, name = "Spectral")), labels = c("L", "M", "S", "X")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "1999") 
+
+
+
+```
+
+```{r}
+plot2000 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip2000,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 4, name = "Spectral")), labels = c("L", "M", "S", "X")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "2000") 
+```
+
+```{r}
+plot2001 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip2001,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 4, name = "Spectral")), labels = c("L", "M", "S", "X")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "2001") 
+```
+`
+```{r}
+plot2002 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip2002,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 4, name = "Spectral")), labels = c("L", "M", "S", "X")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "2002") 
+
+```
+
+```{r}
+plot2003 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip2003,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 4, name = "Spectral")), labels = c("L", "M", "S", "X")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "2003") 
+```
+
+```{r}
+plot2004 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip2004,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 4, name = "Spectral")), labels = c("L", "M", "S", "X")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "2004") 
+
+plot2004
+
+```
+
+```{r}
+plot2005 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip2005,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 5, name = "Spectral")), labels = c("T", "L", "M", "S", "V")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "2005") 
+
+plot2005
+
+```
+
+```{r}
+plot2006 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip2006,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 5, name = "Spectral")), labels = c("T", "L", "M", "S", "V")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "2006") 
+
+plot2006
+
+```
+
+```{r}
+plot2007 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip2007,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 5, name = "Spectral")), labels = c("T", "L", "M", "S", "V")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "2007") 
+
+plot2007
+
+```
+
+```{r}
+plot2008 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip2008,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 5, name = "Spectral")), labels = c("T", "L", "M", "S", "V")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "2008") 
+
+
+
+```
+
+```{r}
+plot2009 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip2009,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 5, name = "Spectral")), labels = c("T", "L", "M", "S", "V")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "2009") 
+
+
+
+```
+
+```{r}
+plot2010 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip2010,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 5, name = "Spectral")), labels = c("T", "L", "M", "S", "V")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "2010") 
+```
+
+```{r}
+plot2011 = ggplot() +
+  
+     geom_sf(data = allFires, fill = "#C0C0C0", colour="#A9AB9D") +
+      geom_sf(data = clip2011,  aes(fill=SEVERITY), colour = NA) +
+  scale_fill_manual(values=rev(brewer.pal(n = 5, name = "Spectral")), labels = c("T", "L", "M", "S", "V")) +
+  
+coord_sf() +
+  theme(panel.grid.major = element_line(color = "white", linetype = "dashed", 
+        size = 0.5), panel.background = element_rect(fill = "white")) +
+  theme(legend.title = element_blank(), 
+        legend.position = c(.9, .25), 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
+        legend.background = element_rect(fill=alpha('white', 0.0)),
+         axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), 
+        axis.text.y=element_blank(), 
+        axis.ticks.y=element_blank(), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
+  guides(fill=guide_legend(ncol=1,byrow=FALSE)) +
+  labs(subtitle = "2011") 
+```
+# Grid plots
+
+```{r}
+
+grid1 = plot_grid(plot1997, plot1998, plot1999, plot2000, plot2001, plot2002, plot2003, plot2004, plot2005, plot2006, plot2007, plot2008, plot2009, plot2010, plot2011, ncol=3) 
+
+grid1
+
+```
+
+```{r}
+ggsave("../figures/AerialSurveyMaps.png", plot = grid1, dpi = 600, bg = "white")
+```
