@@ -326,3 +326,47 @@ plot1
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/TwoWayInteraction3FWI_v2.tiff", plot = plot1, width = 3, height =4, units = c("in"), dpi=600 )
 ```
+
+```{r}
+plot2 = ggplot(ie_data3) +
+    geom_linerange(aes(x = interaction, ymin = 0, ymax = hstat, colour = weather), 
+                   position = position_dodge(width = 1), show.legend = FALSE)+
+    geom_point(aes(x = interaction, y = hstat, colour = weather),
+               position = position_dodge(width = 1), size = 4) +
+  
+  geom_rect(data = shading, aes(xmin = min, xmax = max, ymin = -Inf, ymax = Inf, fill = factor(col), alpha = 0.1), show.legend = FALSE) +
+  scale_fill_manual(values = c("white", "gray90")) +
+  geom_linerange(aes(x = interaction, ymin = 0, ymax = hstat, colour = weather), 
+                   position = position_dodge(width = 1), show.legend = FALSE)+
+    geom_point(aes(x = interaction, y = hstat, colour = weather),
+               position = position_dodge(width = 1), size = 4) +
+  scale_colour_manual(values = c("#999999", "#D55E00", "#F0E442", "#56B4E9"), name = "Model", breaks = c("Full", "Extreme", "Moderate", "Benign"), labels=c("Full", "Extreme", "Moderate", "Benign"), guide = guide_legend(reverse=FALSE))  +
+    coord_flip() +
+    bar_theme +
+  ylab('Two-way interaction strength') +
+  scale_x_discrete(
+    "Explanatory Variables",
+    labels = c(
+      "FWI:NDVI Prefire" = "FWI:\nNDVI Prefire",
+      "FWI:Elevation" = "FWI:\nElevation",
+      "Elevation:NDVI Prefire" = "Elevation:\nNDVI Prefire",
+      "FWI:dNDMI" = "FWI:\ndNDMI",
+      "dNDMI:NDVI Prefire" = "dNDMI:\nNDVI Prefire",
+      "dNDMI:Elevation" = "dNDMI:\nElevation")) +
+ geom_text(data=ie_data3,aes(x=interaction,y=hstat, label=hstat, group=weather), size=1.5, position = position_dodge(width = 1)) +
+  theme(legend.position =c(.90, .08),
+              legend.title = element_text(size = 5),
+              legend.text = element_text(size = 4),
+        legend.key.size = unit(.05, "in"),
+        legend.background = element_rect(fill=alpha('white', 0.0))) +
+  guides(fill = guide_legend( ncol=1)) + 
+  guides(shape = guide_legend(override.aes = list(size = 0.5))) + 
+  guides(color = guide_legend(override.aes = list(size = 0.5))) +
+facet_wrap(~weather, nrow=2)
+
+plot2
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/TwoWayInteraction3FWIWrap_v2.tiff", plot = plot2, width = 6, height =6, units = c("in"), dpi=600 )
+```
