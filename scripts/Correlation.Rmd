@@ -1,0 +1,47 @@
+---
+title: "Correlation"
+author: "Anna Talucci"
+date: '2022-09-03'
+output: html_document
+---
+
+# Overview
+
+# Library 
+```{r}
+library(corrplot)
+```
+
+# Data
+```{r}
+model.data = read.csv("../data/CombinedData/CombineDataCat3FWI.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+```{r}
+
+data1 = model.data %>%
+  dplyr::select(dndmi, elevation, fwi, ndviprefire)
+data1
+```
+
+```{r}
+corrplot(cor(data1), is.corr = FALSE, method="number")
+```
+
+```{r}
+corrplot(cor(data1), type="upper", order="hclust",
+         col=brewer.pal(n=8, name="PuOr"))
+```
+
+```{r}
+corrplot(cor(data1), order = 'AOE', addCoef.col = 'black', tl.pos = 'd',
+         cl.pos = 'n', col = COL2('PiYG'))
+```
+
+```{r fig.height=3, fig.width=3}
+cor4 = corrplot(cor(data1), method = 'square', order = 'AOE', addCoef.col = 'black', tl.pos = 'd',
+         cl.pos = 'n', col = COL2('BrBG'))
+
+cor4
+```
+
