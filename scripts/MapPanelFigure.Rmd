@@ -64,6 +64,13 @@ dndmi_tw<-raster("../data/GEE_layers_forMaps/tw_layers/withdndmi.tif")
 ```
 
 ```{r}
+dndmi_tw
+```
+```{r}
+dndmi_en
+```
+
+```{r}
 plot(dndmi_tw)
 ```
 ### ndvi
@@ -102,43 +109,52 @@ tw_polyzone9 = st_transform(tw_poly, crs = zone9)
 en_forestzone10 = st_transform(en_forest, crs = zone10)
 ch_forestzone10 = st_transform(ch_forest, crs = zone10)
 tw_forestzone9 = st_transform(tw_forest, crs = zone9)
+tw_forestzone10 = st_transform(tw_forest, crs = zone10)
 ```
 
 # Multipoly to poly
 
 ```{r}
-en_zone10 <- st_cast(en_forestzone10$geometry, "POLYGON") %>% st_as_sf(.)
+en_zone10 <- st_cast(en_forestzone10$geometry, "POLYGON") %>% st_as_sf(.) %>% st_zm(.)
 ```
 
 ```{r}
-ch_zone10 <- st_cast(ch_forestzone10$geometry, "POLYGON") %>% st_as_sf(.)
-tw_zone9 <- st_cast(tw_forestzone9$geometry, "POLYGON") %>% st_as_sf(.)
+ch_zone10 <- st_cast(ch_forestzone10$geometry, "POLYGON") %>% st_as_sf(.) %>% st_zm(.)
+tw_zone9 <- st_cast(tw_forestzone9$geometry, "POLYGON") %>% st_as_sf(.) %>% st_zm(.)
+
+tw_zone10 <- st_cast(tw_forestzone10$geometry, "POLYGON") %>% st_as_sf(.) %>% st_zm(.)
 ```
 
-# Crop
+
+# Plots
+```{r}
+plot(ndvi_en)
+plot(en_zone10, add=TRUE)
+```
+# Mask
 
 ## NDVI
 ```{r}
-mask_ndvi_en = raster::mask(ndvi_en, st_geometry(en_forest))
+mask_ndvi_en = raster::mask(ndvi_en, en_zone10)
 ```
 
 ```{r}
-mask_ndvi_ch = raster::mask(ndvi_ch, st_geometry(ch_zone10))
-mask_ndvi_tw = raster::mask(ndvi_tw, st_geometry(tw_zone9))
+mask_ndvi_ch = raster::mask(ndvi_ch, ch_zone10)
+mask_ndvi_tw = raster::mask(ndvi_tw, tw_zone9)
 ```
 
 ## dNDMI
 
 ```{r}
-mask_dndmi_en = raster::mask(dndmi_en, en_polyzone10)
-mask_dndmi_ch = raster::mask(dndmi_ch, ch_polyzone10)
-mask_dndmi_tw = raster::mask(dndmi_tw, tw_polyzone9)
+mask_dndmi_en = raster::mask(dndmi_en,  en_zone10)
+mask_dndmi_ch = raster::mask(dndmi_ch, ch_zone10)
+mask_dndmi_tw = raster::mask(dndmi_tw, tw_zone10)
 ```
 
 ```{r}
-mask_rdnbr_en = raster::mask(rdnbr_en, en_polyzone10)
-mask_rdnbr_ch = raster::mask(rdnbr_ch, ch_polyzone10)
-mask_rdnbr_tw = raster::mask(rdnbr_tw, tw_polyzone9)
+mask_rdnbr_en = raster::mask(rdnbr_en,  en_zone10)
+mask_rdnbr_ch = raster::mask(rdnbr_ch, ch_zone10)
+mask_rdnbr_tw = raster::mask(rdnbr_tw, tw_zone9)
 ```
 
 
@@ -146,15 +162,15 @@ mask_rdnbr_tw = raster::mask(rdnbr_tw, tw_polyzone9)
 
 ## Polys
 ```{r}
-map_en = tm_shape(en_poly) + tm_polygons()
+map_en = tm_shape(en_poly) + tm_polygons(col="white")
 ```
 
 ```{r}
-map_ch = tm_shape(ch_poly) + tm_polygons()
+map_ch = tm_shape(ch_poly) + tm_polygons(col="white")
 ```
 
 ```{r}
-map_tw = tm_shape(tw_poly) + tm_polygons()
+map_tw = tm_shape(tw_poly) + tm_polygons(col="white")
 ```
 
 ## Bounding Box
@@ -177,28 +193,70 @@ bbox_new <- bbox_new %>%  # take the bounding box ...
 ## Breaks
 
 ```{r}
-breaks_fwi = c(0, 13, 27, 50)
-breaks_ndvi = c(0, 0.4, 0.6, 0.7, 0.8, 1)
+breaks_fwi = c(0, 13, 29, 50)
+breaks_ndvi = c(0,  0.3, 0.5, 0.7, 1)
 breaks_dndmi = c(-100, 0, 100, 200, 600)
 breaks_rdnbr = c(0, 641, 1500)
 ```
 
+## Labels for Legend
+```{r}
+labs_dndmi = c("Regrowth (<=-100", "Unchanged/low (>-100-100)", "Moderate mortality (>100-200)", "High mortality (>200)")
+labs_ndvi = c("Dead/sparse (<=0.4)", "Mixed live/dead (>0.4-0.7)",  "Live/dense (>=0.8" )
+labs_fwi = c("Benign (<=13)", "Moderate (>13-29)", "Extreme (>29)")
+labs_rdnbr = c ("Other severity (<641)", "High Severity (>=641)")
+
+lab_ndvi = c("0", "",  "0.5", "", "1" )
+```
+expression(phantom(x) >=80
+## Palettes
+
+```{r}
+
+pal_dndmi = c('#018571','#80cdc1', '#dfc27d','#a6611a')
+pal_ndvi = c("#7C7C7C", "#C3C3C3", "#F6FF97", "#96B566",  "#668E39")
+pal_fwi = c('#4b7e75','#e5c850', '#d87641')
+pal_rdnbr = c("#daf7a6", "#ffc300")
+```
+
+#Assemble Figure
 ## dNDMI
 
-## aesthetics
+### aesthetics
+labels=labs_dndmi
+
+c(.63,0)
+
+
 ```{r}
-beetle_legend = tm_raster(palette = "BrBG",  breaks = breaks_dndmi, title = "FWI") + tm_layout(frame.lwd=2, frame = FALSE)
+beetle_legend = tm_raster(palette = pal_dndmi,  breaks = breaks_dndmi, title = "Outbreak Severity (dNDMI)", style = "cont",legend.is.portrait = FALSE) +              
+  tm_layout(main.title = "Tweedsmuir fire (2013)", 
+                  main.title.size = .9, 
+                  main.title.position=c("center", "top"),  
+            title = "(b)", 
+                  title.size = .8, 
+                  title.position = c(0, .90),
+                  frame.lwd=2, frame = FALSE, 
+                  legend.title.size = .8, 
+                  legend.text.size = 0.6, 
+                  legend.position = c(.57, 0), 
+            legend.width = 1, 
+            legend.height = .22,
+            legend.outside = FALSE )
 ```
 
 ```{r}
-beetle_nolegend = tm_raster( palette = "BrBG", breaks = breaks_dndmi, legend.show = FALSE) + tm_layout(frame.lwd=2, frame = FALSE)
+beetle_nolegend1 = tm_raster(palette = pal_dndmi, breaks = breaks_dndmi, legend.show = FALSE) + tm_layout(main.title = "Entiako fire (2012)", main.title.size = .9, main.title.position=c("center", "top"), frame.lwd=2, frame = FALSE, title = "(a)", title.size = .8, title.position = c(0, .90))
 ```
 
+```{r}
+beetle_nolegend2 = tm_raster(palette = pal_dndmi, breaks = breaks_dndmi, legend.show = FALSE) + tm_layout(main.title = "Chelaslie fire (2014)", main.title.size = .9, main.title.position=c("center", "top"), frame.lwd=2, frame = FALSE, title = "(c)", title.size = .8, title.position = c(0, .90))
+```
 ### maps
 ```{r}
-map_en1 = map_en + tm_shape(mask_dndmi_en) + beetle_nolegend 
+map_en1 = map_en + tm_shape(mask_dndmi_en) + beetle_nolegend1 
 
-map_ch1 = map_ch + tm_shape(mask_dndmi_ch) + beetle_nolegend 
+map_ch1 = map_ch + tm_shape(mask_dndmi_ch) + beetle_nolegend2
 
 map_tw1 = map_tw + tm_shape(mask_dndmi_tw) + beetle_legend 
 ```
@@ -211,27 +269,40 @@ tmap_arrange(map_en1, map_tw1, map_ch1, nrow = 1, widths = .3, heights = .3)
 
 
 ## NDVI
-
+legend.title.size = 1, legend.text.size = 0.6, legend.position = c(.68, 0), 
 ### aethestics
 ```{r}
-ndvi_legend = tm_raster(style = "cont", palette = "Greens", breaks=breaks_ndvi, interval.closure = "left", title = "NDVI") + tm_layout(frame.lwd=2, frame = FALSE)
+ndvi_legend = tm_raster(palette = pal_ndvi, breaks=breaks_ndvi, labels = lab_ndvi, interval.closure = "left", title = "Prefire vegetation (NDVI)", style = "cont",legend.is.portrait = FALSE) + tm_layout(frame.lwd=2, frame = FALSE, 
+                  legend.title.size = .8, 
+                  legend.text.size = 0.6, 
+                  legend.position = c(.55, 0), 
+            legend.width = 1, 
+            legend.height = .22,
+            legend.outside = FALSE,
+             title = "(e)", title.size = .8, 
+                  title.position = c(0, .90),)
 ```
 
 ```{r}
-ndvi_nolegend = tm_raster(style = "cont", palette = "Greens", breaks=breaks_ndvi, interval.closure = "left", legend.show = FALSE) + tm_layout(frame.lwd=2, frame = FALSE)
+ndvi_nolegend3 = tm_raster(palette = pal_ndvi, breaks=breaks_ndvi, interval.closure = "left", legend.show = FALSE) + tm_layout(frame.lwd=2, frame = FALSE, title = "(d)", title.size = .8, 
+                  title.position = c(0, .90),)
 ```
 
+```{r}
+ndvi_nolegend4 = tm_raster(palette = pal_ndvi, breaks=breaks_ndvi, interval.closure = "left", legend.show = FALSE) + tm_layout(frame.lwd=2, frame = FALSE, title = "(f)", title.size = .8, 
+                  title.position = c(0, .90),)
+```
 ### maps
 ```{r}
-map_en2 = map_en + tm_shape(mask_ndvi_en) + ndvi_nolegend
+map_en2 = map_en + tm_shape(mask_ndvi_en) + ndvi_nolegend3
 
-map_ch2 = map_ch + tm_shape(mask_ndvi_ch) + ndvi_nolegend
+map_ch2 = map_ch + tm_shape(mask_ndvi_ch) + ndvi_nolegend4
 
 map_tw2 = map_tw + tm_shape(mask_ndvi_tw) + ndvi_legend
 ```
 
 ### gridded
-```{r}
+```{r height=1.5, fig.width=6}
 tmap_arrange(map_en2, map_tw2, map_ch2, nrow = 1, widths = .3, heights = .3)
 ```
 
@@ -239,16 +310,34 @@ tmap_arrange(map_en2, map_tw2, map_ch2, nrow = 1, widths = .3, heights = .3)
 
 ### aestheitcs
 ```{r}
-fwi_legend = tm_raster(alpha = 0.7, breaks = breaks_fwi, title = "FWI") + tm_layout(frame.lwd=2, frame = FALSE)
+fwi_legend = tm_raster(palette = pal_fwi, breaks = breaks_fwi, title = "Fire Weather (FWI)", style = "cont",legend.is.portrait = FALSE) + 
+  tm_layout(frame.lwd=2, frame = FALSE, 
+                 legend.title.size = .8, 
+                  legend.text.size = 0.6, 
+                  legend.position = c(.55, 0), 
+            legend.width = 1.5, 
+            legend.height = .22,
+            legend.outside = FALSE,  title = "(h)", title.size = .8, 
+                  title.position = c(0, .90),)
+```
 
-fwi_nolegend = tm_raster(alpha = 0.7,  breaks = breaks_fwi, legend.show = FALSE) + tm_layout(frame.lwd=2, frame = FALSE)
+```{r}
+fwi_nolegend5 = tm_raster(palette = pal_fwi,  breaks = breaks_fwi, legend.show = FALSE) + 
+  tm_layout(frame.lwd=2, frame = FALSE, title = "(g)", title.size = .8, 
+                  title.position = c(0, .90),)
+```
+
+```{r}
+fwi_nolegend6 = tm_raster(palette = pal_fwi,  breaks = breaks_fwi, legend.show = FALSE) + 
+  tm_layout(frame.lwd=2, frame = FALSE, title = "(i)", title.size = .8, 
+                  title.position = c(0, .90),)
 ```
 
 ### Maps
 ```{r}
-map_en3 = map_en + tm_shape(fwi_en) + fwi_nolegend
+map_en3 = map_en + tm_shape(fwi_en) + fwi_nolegend5
 
-map_ch3 = map_ch + tm_shape(fwi_ch) + fwi_nolegend
+map_ch3 = map_ch + tm_shape(fwi_ch) + fwi_nolegend6
 
 map_tw3 = map_tw + tm_shape(fwi_tw) + fwi_legend 
 ```
@@ -259,34 +348,62 @@ tmap_arrange(map_en3, map_tw3, map_ch3, nrow = 1, widths = .3, heights = .3)
 ```
 
 ## RdNBR
-
+legend.title.size = .8, 
+                  legend.text.size = 0.6, 
+                  legend.position = c(.5, 0), 
+            legend.width = 1, 
+            legend.height = .25,
 ### Aethetics
 ```{r}
-rdnbr_legend = tm_raster(alpha = 0.7, breaks = breaks_rdnbr, title = "RdNBR") + 
-  tm_layout(frame.lwd=2, frame = FALSE, legend.title.size = 1, legend.text.size = 0.6, legend.position = c("right","bottom"))
+rdnbr_legend = tm_raster(palette = pal_rdnbr, breaks = breaks_rdnbr, title = "Burn severity (RdNBR)", style = "cont",legend.is.portrait = FALSE) + 
+  tm_layout(frame.lwd=2, frame = FALSE, 
+            legend.title.size = .8, 
+                  legend.text.size = 0.6, 
+                  legend.position = c(.63, .09), 
+            legend.width = 1, 
+            legend.height = .23,
+            legend.outside = FALSE, title = "(k)", title.size = .8, 
+                  title.position = c(0, .90)) + tm_scale_bar(position = c(.33, 0))
+```
 
-rdnbr_nolegend = tm_raster(alpha = 0.7,  breaks = breaks_rdnbr, legend.show = FALSE) + 
-  tm_layout(frame.lwd=2, frame = FALSE)
+```{r}
+rdnbr_nolegend7 = tm_raster(palette = pal_rdnbr,  breaks = breaks_rdnbr, legend.show = FALSE) + 
+  tm_layout(frame.lwd=2, frame = FALSE, title = "(j)", title.size = .8, 
+                  title.position = c(0, .90)) +  tm_scale_bar(position = c(.35, 0))
+```
+
+```{r}
+rdnbr_nolegend8 = tm_raster(palette = pal_rdnbr,  breaks = breaks_rdnbr, legend.show = FALSE) + 
+  tm_layout(frame.lwd=2, frame = FALSE, title = "(l)", title.size = .8, 
+                  title.position = c(0, .90)) +  tm_scale_bar(position = c(.45, 0))
 ```
 
 ### Maps
 ```{r}
-map_en4 = map_en + tm_shape(mask_rdnbr_en) + rdnbr_legend
+map_en4 = map_en + tm_shape(mask_rdnbr_en) + rdnbr_nolegend7
 
-map_ch4 = map_ch + tm_shape(mask_rdnbr_ch) + rdnbr_legend
+map_ch4 = map_ch + tm_shape(mask_rdnbr_ch) + rdnbr_nolegend8
 
-map_tw4 = map_tw + tm_shape(mask_rdnbr_tw, bbox = bbox_new) + rdnbr_legend
+map_tw4 = map_tw + tm_shape(mask_rdnbr_tw)  +  rdnbr_legend
 ```
 
 ### gridded
-```{r fig.height=2, fig.width=6}
-tmap_arrange(map_en4, map_tw4, map_ch4, nrow = 1, widths = .25, heights = .25)
+```{r fig.height=1.5, fig.width=6}
+tmap_arrange(map_en4, map_tw4, map_ch4, nrow = 1, widths = .3, heights = .3)
 
 ```
 
 # All
-```{r fig.height=6, fig.width=6}
-tmap_arrange( map_en1, map_tw1, map_ch1, map_en2, map_tw2, map_ch2, map_en3, map_tw3, map_ch3, map_en4, map_tw4, map_ch4, nrow = 4, widths = .3, heights = .3)
+```{r fig.height=7, fig.width=6}
+map_grid = tmap_arrange( map_en1, map_tw1, map_ch1, map_en2, map_tw2, map_ch2, map_en3, map_tw3, map_ch3, map_en4, map_tw4, map_ch4, nrow = 4, widths = .3, heights = .3)
+
+map_grid
+
+```
+
+```{r}
+tmap_save(map_grid, "../figures/MappedVariables.png",  width = 6, height = 6, units = c("in"), dpi=600 )
+
 
 ```
 
