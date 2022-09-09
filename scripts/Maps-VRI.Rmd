@@ -91,6 +91,21 @@ ch_pine = ch_vri %>% filter(SPECIES_CD=="PL")
 tw_pine = tw_vri %>% filter(SPECIES_CD=="PL")
 ```
 
+```{r}
+
+percent_pine_en = sum(en_pine$SHAPE_Area)/sum(en_vri$SHAPE_Area)*100
+percent_pine_en
+
+percent_pine_ch = sum(ch_pine$SHAPE_Area)/sum(ch_vri$SHAPE_Area)*100
+percent_pine_ch
+
+percent_pine_tw = sum(tw_pine$SHAPE_Area)/sum(tw_vri$SHAPE_Area)*100
+percent_pine_tw
+```
+
+```{r}
+(sum(tw_pine$SHAPE_Area)+sum(ch_pine$SHAPE_Area)+sum(en_pine$SHAPE_Area))/(sum(tw_vri$SHAPE_Area)+sum(ch_vri$SHAPE_Area)+sum(en_vri$SHAPE_Area))*100
+```
 # Define Breaks
 ```{r}
 my_breaks <- c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
