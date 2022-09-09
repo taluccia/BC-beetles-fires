@@ -257,6 +257,12 @@ df2 %>%
 
 ```{r}
 df2 %>% 
+  group_by(FireYr, fwi_cat) %>%
+  count(rdnbr_class)
+```
+
+```{r}
+df2 %>% 
   count(rdnbr_class)
 ```
 
