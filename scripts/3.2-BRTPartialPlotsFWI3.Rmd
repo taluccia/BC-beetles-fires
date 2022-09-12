@@ -94,7 +94,7 @@ vars4
 
 Nicer variable names for x axis labels Must be in same order as vars
 ```{r}
-x_names4 = c("dNDMI", "Elevation (m)", "FWI", "NDVI")
+x_names4 = c("Outbreak severity (dNDMI)", "Elevation (m)", "Fire Weather (FWI)", "Prefire vegetation (NDVI)")
 ```
 
 ### Predicted dataset 
@@ -143,7 +143,7 @@ range(bind_rows(pred_mods4)$center_y)
 ### Plot with improved x axis names ----
 ```{r}
 model_id <- ggplot(data = pred_mods4[[1]], aes(x = x, y = center_y, linetype = model, color = model) ) +
-        geom_smooth(span = 0.5, se = FALSE) + # choose span? 
+        geom_smooth(span = 0.5, se = TRUE) + # choose span? 
         scale_color_manual(values = c('#d7191c','#fdae61','#abd9e9','#2c7bb6'), name = "Fire weather", guide = guide_legend(reverse=TRUE)) +
         scale_linetype_manual(values = c("solid", "longdash", "twodash", "dotdash"), name = "Fire weather", guide = guide_legend(reverse=TRUE)) +
         labs(x = x_names4[[1]]) +
@@ -174,7 +174,7 @@ scale_linetype_manual(values = c("solid", "longdash", "twodash", "dotdash"), nam
 ### Figure Legend
 ```{r}
 BC_leg = ggplot(data = pred_mods4[[1]], aes(x = x, y = center_y, color = model) ) +
-        geom_smooth(span = 0.5, se = FALSE) + # choose span? 
+        geom_smooth(span = 0.5, se = TRUE, aes(color = model), alpha = 0.5) + # choose span? 
         scale_color_manual(values = c("#999999", "#D55E00", "#F0E442", "#56B4E9"), name = "Burning conditions", breaks = c("Full", "Extreme", "Moderate", "Benign"), labels=c("Full", "Extreme", "Moderate", "Benign"), guide = guide_legend(reverse=FALSE)) +
         
         labs(y = "Fitted Function",
@@ -200,7 +200,7 @@ BC_leg
  labels=c("Full", "Extreme", "Moderate", "Benign")
 ```{r}
 legBottom = ggplot(data = pred_mods4[[1]], aes(x = x, y = center_y, color = model) ) +
-        geom_smooth(span = 0.5, se = FALSE) + # choose span? 
+        geom_smooth(span = 0.5, se = TRUE) + # choose span? 
          scale_color_manual(values = c("#999999", "#D55E00", "#F0E442", "#56B4E9"), name = "Burning conditions", breaks = c("Full", "Extreme", "Moderate", "Benign"), labels=c("Full", "Extreme", "Moderate", "Benign"), guide = guide_legend(reverse=FALSE)) +
         
         labs(y = "Fitted Function",
@@ -237,7 +237,31 @@ Adjust plot margins for compiling a panel figure with cowplot.
 ```{r}
 pardep_plot_mods4 = function(data, x_var) {
      ggplot(data = data, aes(x = x, y = center_y, color = model) ) +
-    geom_smooth(span = 0.5, se = FALSE) + # choose span? 
+    geom_smooth(span = 0.5, se = TRUE, level = 0.90, fullrange = FALSE, aes(fill = model),size = .5, alpha = 0.25) + # choose span? 
+    scale_color_manual(values = c("#56B4E9", "#D55E00", "#999999", "#F0E442")) +
+    scale_fill_manual(values = c("#56B4E9", "#D55E00", "#999999", "#F0E442")) +
+                labs(x = x_var) +
+                theme_bw(base_size = 12) +
+                theme(plot.margin = unit(c(0.05, 0.2, 0.05, 0.5), "cm")) +
+                theme(axis.text.x = element_text(size = 10, color = "black"),
+                      axis.text.y = element_text(size = 10, color = "black"),
+                      panel.border = element_rect(color = "black", size = 1.25),
+                      panel.grid.major = element_line(color = 'white', linetype = 'dashed'), panel.grid.minor = element_blank(),
+                      legend.position = "none") +
+                scale_x_continuous(labels = scales::format_format(scientific = FALSE)) +
+                scale_x_continuous(labels = comma) +
+                #ylim(-1.55, 1.55) +
+                geom_hline(yintercept=0)+
+                scale_y_continuous(limits=c(-2.2,2.2), breaks=c(-2.197225,-0.8472979, 0, 0.8472979, 2.197225), labels = c("0.1", "0.3", "0.5", "0.7", "0.9"), name="Probability")
+}
+
+pardep_plot_mods4(data = pred_mods4[[1]], x_var = x_names4[[1]])
+```
+
+```{r eval=FALSE, include=FALSE}
+pardep_plot_mods4 = function(data, x_var) {
+     ggplot(data = data, aes(x = x, y = center_y, color = model) ) +
+    geom_smooth(span = 0.5, se = TRUE, level = 0.90, fullrange = FALSE, aes(fill = model)) + # choose span? 
     scale_color_manual(values = c("#56B4E9", "#D55E00", "#999999", "#F0E442")) +
                 labs(x = x_var) +
                 theme_bw(base_size = 12) +
