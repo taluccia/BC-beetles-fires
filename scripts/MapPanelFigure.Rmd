@@ -84,6 +84,45 @@ ndvi_tw<-raster("../data/GEE_layers_forMaps/tw_layers/ndviprefire.tif")
 ```{r}
 ndvi_en
 ```
+# VRI
+## Fires Perimeters
+
+### Data
+```{r}
+fires = st_read("../data/PROT_HISTORICAL_FIRE_POLYS_SP/H_FIRE_PLY_polygon.shp", "H_FIRE_PLY_polygon") 
+```
+
+### Select Fires
+```{r}
+en_fire = fires %>%
+  filter(FIRE_YEAR>2011) %>%
+  filter(FIRE_YEAR<2015) %>%
+  filter(SIZE_HA>3000) %>%
+  filter(FIRE_NO=="R10171" )
+
+en_fire
+```
+
+```{r}
+tw_fire = fires %>%
+  filter(FIRE_YEAR>2011) %>%
+  filter(FIRE_YEAR<2015) %>%
+  filter(SIZE_HA>3000) %>%
+  filter(FIRE_NO=="R10252")
+
+tw_fire
+```
+
+```{r}
+ch_fire = fires %>%
+  filter(FIRE_YEAR>2011) %>%
+  filter(FIRE_YEAR<2015) %>%
+  filter(SIZE_HA>3000) %>%
+  filter(FIRE_NO=="R10070" )
+
+ch_fire
+```
+
 # Projection
 
 ```{r}
@@ -173,6 +212,8 @@ map_ch = tm_shape(ch_poly) + tm_polygons(col="white")
 map_tw = tm_shape(tw_poly) + tm_polygons(col="white")
 ```
 
+
+
 ## Bounding Box
 ```{r}
 bbox_new <- st_bbox(tw_poly) # current bounding box
@@ -189,7 +230,9 @@ bbox_new <- bbox_new %>%  # take the bounding box ...
   st_as_sfc() # ... and make it a sf polygon
 ```
 
-
+```{r}
+st_bbox(en_poly)
+```
 ## Breaks
 
 ```{r}
@@ -198,6 +241,7 @@ breaks_ndvi = c(0,  0.3, 0.5, 0.7, 1)
 breaks_dndmi = c(-100, 0, 100, 200, 600)
 breaks_rdnbr = c(0, 641, 1500)
 ```
+
 
 ## Labels for Legend
 ```{r}
@@ -220,6 +264,8 @@ pal_rdnbr = c("#daf7a6", "#ffc300")
 ```
 
 #Assemble Figure
+
+
 ## dNDMI
 
 ### aesthetics

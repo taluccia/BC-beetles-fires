@@ -18,7 +18,9 @@ library(tidyr)
 library(ggplot2)
 library(lubridate)
 library(RColorBrewer)
+library(tmap)
 ```
+
 
 
 
@@ -75,6 +77,18 @@ en_vri= st_read("../data/VRI1/Entiako_VRI.shp", "Entiako_VRI")
 tw_vri= st_read("../data/VRI1/Tweeds_VRI.shp", "Tweeds_VRI") 
 ```
 
+```{r}
+ch_vri_all= st_read("../data/VRI1/CH_2014_VRI.shp", "CH_2014_VRI") 
+```
+
+```{r}
+en_vri_all= st_read("../data/VRI1/EN_2012_VRI.shp", "EN_2012_VRI") 
+```
+
+```{r}
+tw_vri_all = st_read("../data/VRI1/TW_2013_VRI.shp", "TW_2013_VRI") 
+```
+
 # Select Data
 
 ```{r}
@@ -82,12 +96,36 @@ head(en_vri)
 ```
 
 ```{r}
-unique(en_vri$SPECIES_CD)
+unique(ch_vri$SPECIES_CD)
+```
+
+```{r}
+unique(en_vri$BCLCS_LE_1)
+```
+
+# Select non veg
+```{r}
+en_water = en_vri_all %>% filter(BCLCS_LE_1=="W")
+ch_water = ch_vri_all %>% filter(BCLCS_LE_1=="W")
+tw_water = tw_vri_all %>% filter(BCLCS_LE_1=="W")
+```
+
+```{r}
+plot(st_geometry(en_water))
+```
+```{r}
+en_nonveg = en_vri_all %>% filter(BCLCS_LE_1=="N")
+ch_nonveg = ch_vri_all %>% filter(BCLCS_LE_1=="N")
+tw_nonveg = tw_vri_all %>% filter(BCLCS_LE_1=="N")
+```
+
+```{r}
+plot(st_geometry(en_nonveg))
 ```
 # Select Pine
 ```{r}
 en_pine = en_vri %>% filter(SPECIES_CD=="PL")
-ch_pine = ch_vri %>% filter(SPECIES_CD=="PL")
+ch_pine = ch_vri %>% filter(SPECIES_CD=="PL") 
 tw_pine = tw_vri %>% filter(SPECIES_CD=="PL")
 ```
 
@@ -106,6 +144,19 @@ percent_pine_tw
 ```{r}
 (sum(tw_pine$SHAPE_Area)+sum(ch_pine$SHAPE_Area)+sum(en_pine$SHAPE_Area))/(sum(tw_vri$SHAPE_Area)+sum(ch_vri$SHAPE_Area)+sum(en_vri$SHAPE_Area))*100
 ```
+
+# Select not pine
+# Select Pine
+```{r}
+en_nopine = en_vri %>% filter(SPECIES_CD!="PL")
+ch_nopine = ch_vri %>% filter(BCLCS_LE_1!="W") %>% filter(!SPECIES_CD %in% c("PL", "PLI"))
+tw_nopine = tw_vri %>% filter(SPECIES_CD!="PL")
+```
+
+```{r}
+plot(st_geometry(ch_nopine))
+```
+
 # Define Breaks
 ```{r}
 my_breaks <- c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
@@ -117,6 +168,7 @@ my_breaks2 <- c(25, 50, 75, 100)
 ```{r}
 en_plot = ggplot() +
   geom_sf(data = en_fire, fill = "#C0C0C0", colour="#A9AB9D") +
+  geom_sf(data = en_water, fill = "#5d89ba", colour = "#5d89ba") +
       geom_sf(data = en_pine,  aes(fill=SPECIES_PC), colour = NA) +
   scale_fill_gradientn(colours=(brewer.pal(n = 4, name = "YlGn")),
                        name="Percent Lodgepole Pine",
@@ -146,6 +198,8 @@ en_plot
 ```{r}
 ch_plot = ggplot() +
   geom_sf(data = ch_fire, fill = "#C0C0C0", colour="#A9AB9D") +
+  
+  geom_sf(data = ch_water, fill = "#5d89ba", colour = "#5d89ba") +
       geom_sf(data = ch_pine,  aes(fill=SPECIES_PC), colour = NA) +
   scale_fill_gradientn(colours=(brewer.pal(n = 4, name = "YlGn")),
                        name="Percent Lodgepole Pine",
@@ -172,6 +226,8 @@ ch_plot
 ```{r}
 tw_plot = ggplot() +
   geom_sf(data = tw_fire, fill = "#C0C0C0", colour="#A9AB9D") +
+  
+  geom_sf(data = tw_water, fill = "#5d89ba", colour = "#5d89ba") +
       geom_sf(data = tw_pine,  aes(fill=SPECIES_PC), colour = NA) +
   scale_fill_gradientn(colours=(brewer.pal(n = 4, name = "YlGn")),
                        name="Percent Lodgepole Pine",
@@ -200,13 +256,132 @@ tw_plot
 
 ```{r fig.height=3, fig.width=6}
 
-grid1 = plot_grid(en_plot, tw_plot, ch_plot, ncol=3) 
+grid1 = cowplot::plot_grid(en_plot, tw_plot, ch_plot, ncol=3) 
 
 grid1
 
 ```
 
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 ggsave("../figures/VRI-LodgepolePine.png", plot = grid1, width = 6, height = 3, units = c("in"),dpi = 600, bg = "white")
+```
+
+# With tmap
+# Palettes
+```{r}
+pal_ch_nopine = c("#B35806", "#E08214", "#FDB863", "#FEE0B6", "#D8DAEB", "#B2ABD2", "#8073AC", "#542788")
+pal_en_nopine = c("#E08214", "#FEE0B6", "#D8DAEB", "#8073AC")
+pal_tw_nopine = c("#B35806", "#E08214", "#FDB863", "#F7F7F7", "#8073AC","#542788")
+```
+"#B35806" "#E08214" "#FDB863" "#FEE0B6" "#D8DAEB" "#B2ABD2" "#8073AC" "#542788"
+ "PL"        "PLI"      
+
+```{r}
+breaks_nopine = c("AC",  "AT",  "BL", "L", "S", "SB", "SE", "SW",  "SX", "Missing" )
+pal_nopine = c("#B35806", "#E08214", "#FDB863", "#FEE0B6", "#F7F7F7", "#D8DAEB", "#B2ABD2", "#8073AC", "#542788", "#C0C0C0")
+```
+
+## Bounding Box
+```{r}
+st_bbox(en_fire)
+```
+
+```{r}
+bbox_en = st_bbox( c(xmin =1020745.6, ymin =901900.2, xmax = 1038355.2, ymax= 916902.9 ))
+bbox_tw = st_bbox( c(xmin =985229.8, ymin =916146.9, xmax = 997233.6, ymax= 925038.5))
+bbox_ch = st_bbox( c(xmin =998102.4, ymin =892874.2, xmax = 1069842.7, ymax= 940427.2))
+```
+     xmin      ymin      xmax      ymax 
+1023087.6  903570.8 1037586.7  914616.2 
+
+```{r}
+st_bbox(en_pine)
+st_bbox(tw_pine)
+st_bbox(ch_pine)
+```
+
+## Fires for VRI
+
+### Entiako
+
+```{r}
+map_en_vri = tm_shape(en_fire, bbox =bbox_en) + tm_polygons(col="#C0C0C0") +
+  tm_shape(en_water, bbox =bbox_en) + tm_polygons(col = "#5d89ba", border.col= "#5d89ba") + 
+  tm_shape(en_nopine, bbox =bbox_en) + tm_fill(col = "SPECIES_CD", palette = pal_en_nopine, breaks = breaks_nopine, style="fixed", title = "Other Species",legend.show = TRUE) +
+  tm_shape(en_pine, bbox =bbox_en) + tm_fill(col = "SPECIES_PC", palette = "YlGn", breaks = my_breaks2, style = "cont",title = "Percent pine", legend.show = FALSE) +
+  tm_layout( title = "(a)", title.size = .8, title.position = c(0, .90),
+                  frame.lwd=2, 
+                  frame = FALSE,
+             legend.title.size = .8, 
+                  legend.text.size = 0.6, 
+                  legend.position = c(.57, 0), 
+            legend.width = 1, 
+            legend.height = .22,
+            legend.outside = FALSE)
+```
+
+
+```{r}
+map_en_vri
+```
+
+
+```{r}
+brewer.pal(9, "PuOr")
+
+# [1] "#A6CEE3" "#1F78B4" "#B2DF8A" "#33A02C" "#FB9A99" "#E31A1C"
+# [7] "#FDBF6F" "#FF7F00" "#CAB2D6" "#6A3D9A" "#FFFF99" "#B15928"
+
+# to display that palette:
+display.brewer.pal(9, "PuOr")
+```
+
+"#BEBADA" "#FB8072" "#FDB462"  "#FCCDE5"
+
+### CH
+```{r}
+map_ch_vri = tm_shape(ch_fire, bbox =bbox_ch) + tm_polygons(col="#C0C0C0") +
+  tm_shape(ch_water, bbox =bbox_ch) + tm_polygons(col = "#5d89ba", border.col= "#5d89ba") + 
+  tm_shape(ch_nopine, bbox =bbox_ch) + tm_fill(col = "SPECIES_CD", palette = pal_ch_nopine, title = "Other Species",legend.show = TRUE) +
+  tm_shape(ch_pine, bbox =bbox_ch) +tm_fill(col = "SPECIES_PC", palette = "YlGn", breaks = my_breaks2, style = "cont",title = "Percent pine", legend.show = FALSE) +
+  tm_layout( title = "(c)", 
+                  title.size = .8, 
+                  title.position = c(0, .90),
+                  frame.lwd=2, 
+             frame = FALSE,
+             legend.title.size = .8, 
+                  legend.text.size = 0.6, 
+                  legend.position = c(.57, 0), 
+            legend.width = 1, 
+            legend.height = .22,
+            legend.outside = FALSE )
+```
+
+```{r}
+map_ch_vri
+```
+
+```{r}
+map_tw_vri = tm_shape(tw_fire, bbox =bbox_tw) + tm_polygons(col="#C0C0C0") +
+  tm_shape(tw_water, bbox =bbox_tw) + tm_polygons(col = "#5d89ba", border.col= "#5d89ba") + 
+  tm_shape(tw_nopine, bbox =bbox_tw) + tm_fill(col = "SPECIES_CD", palette = pal_tw_nopine, title = "Other Species",legend.show = TRUE) +
+  tm_shape(tw_pine, bbox =bbox_tw) +tm_fill(col = "SPECIES_PC", palette = "YlGn", breaks = my_breaks2, style = "cont",title = "Percent pine", legend.is.portrait = FALSE)  +
+  tm_layout( title = "(b)", 
+                  title.size = .8, 
+                  title.position = c(0, .90),
+                  frame.lwd=2, frame = FALSE, 
+                  legend.title.size = .8, 
+                  legend.text.size = 0.6, 
+                  legend.position = c(.7, 0), 
+            legend.width = 1, 
+            legend.height = .22,
+            legend.outside = FALSE )
+```
+
+
+### gridded
+```{r}
+tmap_arrange(map_en_vri, map_tw_vri, map_ch_vri, nrow = 1, widths = .3, heights = .3)
+
 ```
