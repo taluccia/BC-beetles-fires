@@ -85,14 +85,14 @@ ndvi_tw<-raster("../data/GEE_layers_forMaps/tw_layers/ndviprefire.tif")
 ndvi_en
 ```
 # VRI
-## Fires Perimeters
+# Fires Perimeters
 
-### Data
+## Data
 ```{r}
 fires = st_read("../data/PROT_HISTORICAL_FIRE_POLYS_SP/H_FIRE_PLY_polygon.shp", "H_FIRE_PLY_polygon") 
 ```
 
-### Select Fires
+## Select Fires
 ```{r}
 en_fire = fires %>%
   filter(FIRE_YEAR>2011) %>%
@@ -122,7 +122,100 @@ ch_fire = fires %>%
 
 ch_fire
 ```
+# VRI
 
+## Data
+```{r}
+ch_vri= st_read("../data/VRI1/Chelaslie_VRI.shp", "Chelaslie_VRI") 
+```
+
+```{r}
+en_vri= st_read("../data/VRI1/Entiako_VRI.shp", "Entiako_VRI") 
+```
+
+```{r}
+tw_vri= st_read("../data/VRI1/Tweeds_VRI.shp", "Tweeds_VRI") 
+```
+
+```{r}
+ch_vri_all= st_read("../data/VRI1/CH_2014_VRI.shp", "CH_2014_VRI") 
+```
+
+```{r}
+en_vri_all= st_read("../data/VRI1/EN_2012_VRI.shp", "EN_2012_VRI") 
+```
+
+```{r}
+tw_vri_all = st_read("../data/VRI1/TW_2013_VRI.shp", "TW_2013_VRI") 
+```
+
+# Select Data
+
+```{r}
+head(en_vri)
+```
+
+```{r}
+unique(ch_vri$SPECIES_CD)
+```
+
+```{r}
+unique(en_vri$BCLCS_LE_1)
+```
+
+# Select non veg
+```{r}
+en_water = en_vri_all %>% filter(BCLCS_LE_1=="W")
+ch_water = ch_vri_all %>% filter(BCLCS_LE_1=="W")
+tw_water = tw_vri_all %>% filter(BCLCS_LE_1=="W")
+```
+
+```{r}
+plot(st_geometry(en_water))
+```
+```{r}
+en_nonveg = en_vri_all %>% filter(BCLCS_LE_1=="N")
+ch_nonveg = ch_vri_all %>% filter(BCLCS_LE_1=="N")
+tw_nonveg = tw_vri_all %>% filter(BCLCS_LE_1=="N")
+```
+
+```{r}
+plot(st_geometry(en_nonveg))
+```
+# Select Pine
+```{r}
+en_pine = en_vri %>% filter(SPECIES_CD=="PL")
+ch_pine = ch_vri %>% filter(SPECIES_CD=="PL") 
+tw_pine = tw_vri %>% filter(SPECIES_CD=="PL")
+```
+
+```{r}
+
+percent_pine_en = sum(en_pine$SHAPE_Area)/sum(en_vri$SHAPE_Area)*100
+percent_pine_en
+
+percent_pine_ch = sum(ch_pine$SHAPE_Area)/sum(ch_vri$SHAPE_Area)*100
+percent_pine_ch
+
+percent_pine_tw = sum(tw_pine$SHAPE_Area)/sum(tw_vri$SHAPE_Area)*100
+percent_pine_tw
+```
+
+```{r}
+(sum(tw_pine$SHAPE_Area)+sum(ch_pine$SHAPE_Area)+sum(en_pine$SHAPE_Area))/(sum(tw_vri$SHAPE_Area)+sum(ch_vri$SHAPE_Area)+sum(en_vri$SHAPE_Area))*100
+```
+
+# Select not pine
+# Select Pine
+```{r}
+en_nopine = en_vri %>% filter(SPECIES_CD!="PL")
+ch_nopine = ch_vri %>% filter(BCLCS_LE_1!="W") %>% filter(!SPECIES_CD %in% c("PL", "PLI"))
+tw_nopine = tw_vri %>% filter(SPECIES_CD!="PL")
+```
+
+```{r}
+plot(st_geometry(ch_nopine))
+```
 # Projection
 
 ```{r}
@@ -276,10 +369,7 @@ c(.63,0)
 
 ```{r}
 beetle_legend = tm_raster(palette = pal_dndmi,  breaks = breaks_dndmi, title = "Outbreak Severity (dNDMI)", style = "cont",legend.is.portrait = FALSE) +              
-  tm_layout(main.title = "Tweedsmuir fire (2013)", 
-                  main.title.size = .9, 
-                  main.title.position=c("center", "top"),  
-            title = "(b)", 
+  tm_layout(title = "(e)", 
                   title.size = .8, 
                   title.position = c(0, .90),
                   frame.lwd=2, frame = FALSE, 
@@ -292,11 +382,11 @@ beetle_legend = tm_raster(palette = pal_dndmi,  breaks = breaks_dndmi, title = "
 ```
 
 ```{r}
-beetle_nolegend1 = tm_raster(palette = pal_dndmi, breaks = breaks_dndmi, legend.show = FALSE) + tm_layout(main.title = "Entiako fire (2012)", main.title.size = .9, main.title.position=c("center", "top"), frame.lwd=2, frame = FALSE, title = "(a)", title.size = .8, title.position = c(0, .90))
+beetle_nolegend1 = tm_raster(palette = pal_dndmi, breaks = breaks_dndmi, legend.show = FALSE) + tm_layout( frame.lwd=2, frame = FALSE, title = "(d)", title.size = .8, title.position = c(0, .90))
 ```
 
 ```{r}
-beetle_nolegend2 = tm_raster(palette = pal_dndmi, breaks = breaks_dndmi, legend.show = FALSE) + tm_layout(main.title = "Chelaslie fire (2014)", main.title.size = .9, main.title.position=c("center", "top"), frame.lwd=2, frame = FALSE, title = "(c)", title.size = .8, title.position = c(0, .90))
+beetle_nolegend2 = tm_raster(palette = pal_dndmi, breaks = breaks_dndmi, legend.show = FALSE) + tm_layout( frame.lwd=2, frame = FALSE, title = "(f)", title.size = .8, title.position = c(0, .90))
 ```
 ### maps
 ```{r}
@@ -321,21 +411,21 @@ legend.title.size = 1, legend.text.size = 0.6, legend.position = c(.68, 0),
 ndvi_legend = tm_raster(palette = pal_ndvi, breaks=breaks_ndvi, labels = lab_ndvi, interval.closure = "left", title = "Prefire vegetation (NDVI)", style = "cont",legend.is.portrait = FALSE) + tm_layout(frame.lwd=2, frame = FALSE, 
                   legend.title.size = .8, 
                   legend.text.size = 0.6, 
-                  legend.position = c(.55, 0), 
+                  legend.position = c(.59, 0), 
             legend.width = 1, 
             legend.height = .22,
             legend.outside = FALSE,
-             title = "(e)", title.size = .8, 
+             title = "(h)", title.size = .8, 
                   title.position = c(0, .90),)
 ```
 
 ```{r}
-ndvi_nolegend3 = tm_raster(palette = pal_ndvi, breaks=breaks_ndvi, interval.closure = "left", legend.show = FALSE) + tm_layout(frame.lwd=2, frame = FALSE, title = "(d)", title.size = .8, 
+ndvi_nolegend3 = tm_raster(palette = pal_ndvi, breaks=breaks_ndvi, interval.closure = "left", legend.show = FALSE) + tm_layout(frame.lwd=2, frame = FALSE, title = "(g)", title.size = .8, 
                   title.position = c(0, .90),)
 ```
 
 ```{r}
-ndvi_nolegend4 = tm_raster(palette = pal_ndvi, breaks=breaks_ndvi, interval.closure = "left", legend.show = FALSE) + tm_layout(frame.lwd=2, frame = FALSE, title = "(f)", title.size = .8, 
+ndvi_nolegend4 = tm_raster(palette = pal_ndvi, breaks=breaks_ndvi, interval.closure = "left", legend.show = FALSE) + tm_layout(frame.lwd=2, frame = FALSE, title = "(i)", title.size = .8, 
                   title.position = c(0, .90),)
 ```
 ### maps
@@ -356,26 +446,26 @@ tmap_arrange(map_en2, map_tw2, map_ch2, nrow = 1, widths = .3, heights = .3)
 
 ### aestheitcs
 ```{r}
-fwi_legend = tm_raster(palette = pal_fwi, breaks = breaks_fwi, title = "Fire Weather (FWI)", style = "cont",legend.is.portrait = FALSE) + 
+fwi_legend = tm_raster(palette = "YlOrRd", breaks = breaks_fwi, title = "Fire Weather (FWI)", style = "cont",legend.is.portrait = FALSE) + 
   tm_layout(frame.lwd=2, frame = FALSE, 
                  legend.title.size = .8, 
                   legend.text.size = 0.6, 
-                  legend.position = c(.55, 0), 
+                  legend.position = c(.59, 0), 
             legend.width = 1.5, 
-            legend.height = .22,
-            legend.outside = FALSE,  title = "(h)", title.size = .8, 
+            legend.height = .25,
+            legend.outside = FALSE,  title = "(k)", title.size = .8, 
                   title.position = c(0, .90),)
 ```
 
 ```{r}
-fwi_nolegend5 = tm_raster(palette = pal_fwi,  breaks = breaks_fwi, legend.show = FALSE) + 
-  tm_layout(frame.lwd=2, frame = FALSE, title = "(g)", title.size = .8, 
+fwi_nolegend5 = tm_raster(palette = "YlOrRd",  breaks = breaks_fwi, legend.show = FALSE) + 
+  tm_layout(frame.lwd=2, frame = FALSE, title = "(j)", title.size = .8, 
                   title.position = c(0, .90),)
 ```
 
 ```{r}
-fwi_nolegend6 = tm_raster(palette = pal_fwi,  breaks = breaks_fwi, legend.show = FALSE) + 
-  tm_layout(frame.lwd=2, frame = FALSE, title = "(i)", title.size = .8, 
+fwi_nolegend6 = tm_raster(palette = "YlOrRd",  breaks = breaks_fwi, legend.show = FALSE) + 
+  tm_layout(frame.lwd=2, frame = FALSE, title = "(l)", title.size = .8, 
                   title.position = c(0, .90),)
 ```
 
@@ -408,25 +498,25 @@ rdnbr_legend = tm_raster(palette = pal_rdnbr, breaks = breaks_rdnbr, title = "Bu
                   legend.position = c(.63, .09), 
             legend.width = 1, 
             legend.height = .23,
-            legend.outside = FALSE, title = "(k)", title.size = .8, 
-                  title.position = c(0, .90)) + tm_scale_bar(position = c(.33, 0))
+            legend.outside = FALSE, title = "(n)", title.size = .8, 
+                  title.position = c(0, .90)) + tm_scale_bar(breaks = c(0, 1, 2), width = .2, position = c(.33, 0), text.size=.4, lwd = .1)
 ```
 
 ```{r}
 rdnbr_nolegend7 = tm_raster(palette = pal_rdnbr,  breaks = breaks_rdnbr, legend.show = FALSE) + 
-  tm_layout(frame.lwd=2, frame = FALSE, title = "(j)", title.size = .8, 
-                  title.position = c(0, .90)) +  tm_scale_bar(position = c(.35, 0))
+  tm_layout(frame.lwd=2, frame = FALSE, title = "(m)", title.size = .8, 
+                  title.position = c(0, .90)) +  tm_scale_bar(breaks = c(0, 2, 4), width = .15, position = c(.35, 0), text.size=.4, lwd = .1)
 ```
 
 ```{r}
 rdnbr_nolegend8 = tm_raster(palette = pal_rdnbr,  breaks = breaks_rdnbr, legend.show = FALSE) + 
-  tm_layout(frame.lwd=2, frame = FALSE, title = "(l)", title.size = .8, 
-                  title.position = c(0, .90)) +  tm_scale_bar(position = c(.45, 0))
+  tm_layout(frame.lwd=2, frame = FALSE, title = "(o)", title.size = .8, 
+                  title.position = c(0, .90)) +  tm_scale_bar(breaks = c(0, 10, 20), width = .2, position = c(.45, 0), text.size=.4, lwd = .1)
 ```
 
 ### Maps
 ```{r}
-map_en4 = map_en + tm_shape(mask_rdnbr_en) + rdnbr_nolegend7
+map_en4 = map_en + tm_shape(mask_rdnbr_en,) + rdnbr_nolegend7
 
 map_ch4 = map_ch + tm_shape(mask_rdnbr_ch) + rdnbr_nolegend8
 
@@ -447,11 +537,163 @@ map_grid
 
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 tmap_save(map_grid, "../figures/MappedVariables.png",  width = 6, height = 6, units = c("in"), dpi=600 )
 
 
 ```
 
+# VRI With tmap
+# Palettes
+```{r}
+pal_ch_nopine = c("#B35806", "#E08214", "#FDB863", "#F7F7F7", "#D8DAEB", "#B2ABD2", "#8073AC", "#542788")
+pal_en_nopine = c("#E08214", "#F7F7F7", "#D8DAEB", "#8073AC")
+pal_tw_nopine = c("#B35806", "#E08214", "#FDB863", "#FEE0B6", "#8073AC","#542788")
+```
+"#B35806" "#E08214" "#FDB863" "#FEE0B6" "#D8DAEB" "#B2ABD2" "#8073AC" "#542788"
+ "PL"        "PLI"      
 
+```{r}
+breaks_nopine = c("AC",  "AT",  "BL", "L", "S", "SB", "SE", "SW",  "SX", "Missing" )
+pal_nopine = c("#B35806", "#E08214", "#FDB863", "#FEE0B6", "#F7F7F7", "#D8DAEB", "#B2ABD2", "#8073AC", "#542788", "#C0C0C0")
+```
+
+## Bounding Box
+```{r}
+st_bbox(en_fire)
+```
+
+```{r}
+bbox_en = st_bbox( c(xmin =1020745.6, ymin =901900.2, xmax = 1038355.2, ymax= 916902.9 ))
+bbox_tw = st_bbox( c(xmin =985229.8, ymin =916146.9, xmax = 997233.6, ymax= 925038.5))
+bbox_ch = st_bbox( c(xmin =998102.4, ymin =892874.2, xmax = 1069842.7, ymax= 940427.2))
+```
+     xmin      ymin      xmax      ymax 
+1023087.6  903570.8 1037586.7  914616.2 
+
+```{r}
+st_bbox(en_pine)
+st_bbox(tw_pine)
+st_bbox(ch_pine)
+```
+
+## Fires for VRI
+### Define Breaks
+```{r}
+my_breaks <- c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
+my_breaks1 <- c(40, 50, 60, 70, 80, 90, 100)
+my_breaks2 <- c(25, 50, 75, 100)
+```
+
+### Max for legend
+```{r}
+max_size <- max(c(tw_nopine$SPECIES_CD, ch_nopine$SPECIES_CD))
+```
+
+
+### EN
+
+```{r}
+map_en_vri = tm_shape(en_fire, bbox =bbox_en) + tm_polygons(col="#C0C0C0") +
+  tm_shape(en_water, bbox =bbox_en) + tm_fill(col = "#5d89ba", border.col= "#5d89ba", title = "Water", legend.show = TRUE) + 
+  tm_shape(en_nopine, bbox =bbox_en) + tm_fill(col = "SPECIES_CD", palette = pal_en_nopine, breaks = breaks_nopine, style="fixed", legend.show = FALSE) +
+  tm_shape(en_pine, bbox =bbox_en) + tm_fill(col = "SPECIES_PC", palette = "YlGn", breaks = my_breaks2, style = "cont",title = "Percent pine", legend.show = FALSE) +
+  tm_layout( main.title = "Entiako fire (2012)", 
+             main.title.size = .9, 
+             main.title.position=c("center", "top"),
+             title = "(a)", title.size = .8, title.position = c(0, .90),
+                  frame.lwd=2, 
+                  frame = FALSE,
+             legend.title.size = .8, 
+                  legend.text.size = 0.6, 
+                  legend.position = c(.57, 0), 
+            legend.width = 1, 
+            legend.height = .25,
+            legend.outside = FALSE)
+```
+
+
+```{r}
+map_en_vri
+```
+
+
+### CH
+```{r}
+breaks_nopine = c("AC",  "AT",  "BL", "L", "S", "SB", "SE", "SW",  "SX", "Missing" )
+pal_nopine = c("#B35806", "#E08214", "#FDB863", "#FEE0B6", "#F7F7F7", "#D8DAEB", "#B2ABD2", "#8073AC", "#542788", "#C0C0C0")
+```
+
+```{r}
+map_ch_vri = tm_shape(ch_fire, bbox =bbox_ch) + tm_polygons(col="#C0C0C0") +
+  tm_shape(ch_water, bbox =bbox_ch) + tm_polygons(col = "#5d89ba", border.col= "#5d89ba") + 
+  tm_shape(ch_nopine, bbox =bbox_ch) + tm_fill(col = "SPECIES_CD", palette = pal_ch_nopine, title = "Other Species",legend.show = FALSE) +
+  tm_shape(ch_pine, bbox =bbox_ch) +tm_fill(col = "SPECIES_PC", palette = "YlGn", breaks = my_breaks2, style = "cont",title = "Percent pine", legend.show = FALSE) +
+  tm_layout( main.title = "Chelaslie fire (2014)", 
+             main.title.size = .9, 
+             main.title.position=c("center", "top"), 
+             title = "(c)", 
+                  title.size = .8, 
+                  title.position = c(0, .90),
+                  frame.lwd=2, 
+             frame = FALSE,
+             legend.title.size = .8, 
+                  legend.text.size = 0.6, 
+                  legend.position = c(.75, 0), 
+            legend.width = 1, 
+            legend.height = .6,
+            legend.outside = FALSE ) +
+  tm_add_legend(type = 'fill', 
+                 col = pal_nopine,
+                 border.col = NA,
+                 labels = breaks_nopine,
+                 title="Other Species")
+```
+
+```{r}
+map_ch_vri
+```
+
+### TW
+```{r}
+map_tw_vri = tm_shape(tw_fire, bbox =bbox_tw) + tm_polygons(col="#C0C0C0") +
+  tm_shape(tw_water, bbox =bbox_tw) + tm_polygons(col = "#5d89ba", border.col= "#5d89ba") + 
+  tm_shape(tw_nopine, bbox =bbox_tw) + tm_fill(col = "SPECIES_CD", palette = pal_tw_nopine, title = "Other Species",legend.show = FALSE) +
+  tm_shape(tw_pine, bbox =bbox_tw) +tm_fill(col = "SPECIES_PC", palette = "YlGn", breaks = my_breaks2, style = "cont",title = "Percent pine", legend.is.portrait = FALSE)  +
+  tm_layout(main.title = "Tweedsmuir fire (2013)", 
+                  main.title.size = .9, 
+                  main.title.position=c("center", "top"), 
+            title = "(b)", 
+                  title.size = .8, 
+                  title.position = c(0, .90),
+                  frame.lwd=2, frame = FALSE, 
+                  legend.title.size = .8, 
+                  legend.text.size = 0.6, 
+                  legend.position = c(.7, 0), 
+            legend.width = 1, 
+            legend.height = .3,
+            legend.outside = FALSE )
+```
+
+```{r}
+map_tw_vri
+```
+
+### gridded
+```{r}
+tmap_arrange(map_en_vri, map_tw_vri, map_ch_vri, nrow = 1, widths = .3, heights = .3)
+
+```
+
+# All with VRI
+```{r fig.height=7, fig.width=6}
+map_grid2 = tmap_arrange( map_en_vri, map_tw_vri, map_ch_vri, map_en1, map_tw1, map_ch1, map_en2, map_tw2, map_ch2, map_en3, map_tw3, map_ch3, map_en4, map_tw4, map_ch4, nrow = 5, widths = .3, heights = .3)
+
+map_grid2
+
+```
+
+```{r eval=FALSE, include=FALSE}
+tmap_save(map_grid2, "../figures/MappedVariablesPlusVRI.png",  width = 6, height = 7, units = c("in"), dpi=600 )
+```
 **THE END**
