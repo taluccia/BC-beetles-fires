@@ -5,7 +5,17 @@ date: '2022-09-02'
 output: html_document
 ---
 
+## Set libraries
+```{r include=FALSE}
 
+library(devtools)
+library(gbm)
+library(foreign)
+library(dismo)
+library(tidyverse)
+library(splines)
+
+```
 
 # Load BRT Models 
 Load BRT models that are saved during the model as .Rda files in the working directory. Models are assembled and run in the script 'BRTAnalyses'
@@ -129,6 +139,9 @@ interact.gbm(brt.model1, data_full, i.var=c("dndmi", "ndviprefire"), n.trees = b
 interact.gbm(brt.model1, data_mod, i.var=c("dndmi", "ndviprefire", "fwi", "elevation"), n.trees = brt.model1$n.trees)
 ```
 
+```{r}
+interact.gbm(brt.model1, data_mod, i.var=c("ndviprefire", "fwi", "elevation"), n.trees = brt.model1$n.trees)
+```
 
 # Model 2 Extreme
 ```{r}
@@ -202,7 +215,10 @@ interact.gbm(brt.model3, data_mod, i.var=c("dndmi", "ndviprefire"), n.trees = br
 
 interact.gbm(brt.model3, data_mod, i.var=c("dndmi", "ndviprefire", "fwi", "elevation"), n.trees = brt.model3$n.trees)
 ```
+```{r}
 
+interact.gbm(brt.model3, data_mod, i.var=c("ndviprefire", "fwi", "elevation"), n.trees = brt.model3$n.trees)
+```
 # Model 4 
 ```{r}
 find.int = gbm.interactions(brt.model4)
