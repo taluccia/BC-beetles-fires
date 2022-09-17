@@ -1,0 +1,32 @@
+---
+title: "Elevation v slope"
+author: "Anna Talucci"
+date: '2022-09-15'
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+```
+
+# Data
+```{r}
+df = read.csv("../data/CombinedData/CombineDataCat3FWI.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+```{r}
+head(df)
+```
+
+```{r}
+
+ggplot(data=df, aes(x=elevation, y=SLPPCT)) +
+  geom_point()
+
+```
+
+
+```{r}
+df %>% dplyr::select(SLPPCT, elevation) %>%
+  cor(.)
+```
