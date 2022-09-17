@@ -334,4 +334,90 @@ grid_msplot
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/PartialPlot3FWI_v2.tiff", plot = grid_msplot, width = 6, height =5.25, units = c("in"), dpi=600, bg = "white" )
 ```
+
+# With Rug plot
+
+### Plotting function ----
+Note: plot.margin - t,r,b,l
+
+Adjust plot margins for compiling a panel figure with cowplot.
+['#8c510a','#d8b365','#f6e8c3','#c7eae5','#5ab4ac','#01665e']
+```{r}
+pardep_plot_mods4 = function(data, x_var) {
+     ggplot(data = data, aes(x = x, y = center_y, color = model) ) +
+    geom_smooth(span = 0.5, se = TRUE, level = 0.90, fullrange = FALSE, aes(fill = model),size = .5, alpha = 0.25) + # choose span? 
+    scale_color_manual(values = c("#56B4E9", "#D55E00", "#999999", "#F0E442")) +
+    scale_fill_manual(values = c("#56B4E9", "#D55E00", "#999999", "#F0E442")) +
+                labs(x = x_var) +
+                theme_bw(base_size = 12) +
+                theme(plot.margin = unit(c(0.05, 0.2, 0.05, 0.5), "cm")) +
+                theme(axis.text.x = element_text(size = 10, color = "black"),
+                      axis.text.y = element_text(size = 10, color = "black"),
+                      panel.border = element_rect(color = "black", size = 1.25),
+                      panel.grid.major = element_line(color = 'white', linetype = 'dashed'), panel.grid.minor = element_blank(),
+                      legend.position = "none") +
+                scale_x_continuous(labels = scales::format_format(scientific = FALSE)) +
+                scale_x_continuous(labels = comma) +
+                #ylim(-1.55, 1.55) +
+                geom_hline(yintercept=0)+
+                geom_rug(sides="b") +
+                scale_y_continuous(limits=c(-2.2,2.2), breaks=c(-2.197225,-0.8472979, 0, 0.8472979, 2.197225), labels = c("0.1", "0.3", "0.5", "0.7", "0.9"), name="Probability")
+}
+
+pardep_plot_mods4(data = pred_mods4[[1]], x_var = x_names4[[1]])
+```
+
+### Loop through the models and the x variable names
+    simultaneously with map2()
+```{r}
+all_mod_plots4 = map2(pred_mods4, x_names4, pardep_plot_mods4)
+all_mod_plots4
+```
+
+
+
+### Manuscript Figure
+
+
+```{r}
+legend_bottom <- get_legend(legBottom) 
+```
+Order plots
+-- FWI
+-- Elevation
+-- NDVI
+-- dNDMI
+
+
+```{r fig.height=5, fig.width=6}
+msplot2 = cowplot::plot_grid( all_mod_plots4$fwi, all_mod_plots4$ndviprefire,  all_mod_plots4$elevation, all_mod_plots4$dndmi, ncol = 2) +
+  
+    draw_label("benign", x = .16, y = .62, size = 9) +
+    draw_label("moderate", x = .27, y = .62, size = 9) +
+   draw_label("extreme", x = .42, y = .62, size = 9) +
+    draw_label("dead/\nsparse", x = .75, y = .63, size = 9) +
+    draw_label("live/\ndense", x = .9, y = .63, size = 9) +
+      draw_label("low", x = .2, y = .12, size = 9) +
+   draw_label("high", x = .4, y = .12, size = 9) +
+   draw_label("no\nmortality", x = .7, y = .14, size = 9) +
+   draw_label("high\nmortality", x = .9, y = .14, size = 9) +
+   draw_label("(a)", x = .14, y = .97, size = 10) +
+   draw_label("(b)", x = .64, y = .97, size = 10) +
+   draw_label("(c)", x = .14, y = .47, size = 10) +
+   draw_label("(d)", x = .64, y = .47, size = 10) 
+
+msplot2
+```
+
+```{r fig.height=5.25, fig.width=6}
+grid_msplot2 = cowplot::plot_grid(msplot2, legend_bottom, ncol=1, rel_heights = c(1, .1))
+
+grid_msplot2
+```
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/PartialPlot3FWI_v2_rug.tiff", plot = grid_msplot2, width = 6, height =5.25, units = c("in"), dpi=600, bg = "white" )
+```
+
 **THE END**
