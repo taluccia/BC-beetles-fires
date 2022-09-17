@@ -1,0 +1,790 @@
+---
+title: "150 Sample"
+author: "Anna Talucci"
+date: '2022-09-15'
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(sf)
+library(RColorBrewer)
+library(cowplot)
+library(ggpmisc)
+```
+# Projections
+WGS 84 need for gee
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+```
+
+
+# Data
+
+## MPB Data
+```{r}
+mpb1999= st_read("../data/mpb_poly_1997to2011/ibm_poly_1999.shp", "ibm_poly_1999") 
+```
+```{r}
+mpb2000= st_read("../data/mpb_poly_1997to2011/ibm_poly_2000.shp", "ibm_poly_2000") 
+```
+```{r}
+mpb2001= st_read("../data/mpb_poly_1997to2011/ibm_poly_2001.shp", "ibm_poly_2001") 
+```
+
+```{r}
+mpb2002= st_read("../data/mpb_poly_1997to2011/ibm_poly_2002.shp", "ibm_poly_2002") 
+```
+
+```{r}
+mpb2003= st_read("../data/mpb_poly_1997to2011/ibm_poly_2003.shp", "ibm_poly_2003") 
+```
+
+```{r}
+mpb2004= st_read("../data/mpb_poly_1997to2011/ibm_poly_2004.shp", "ibm_poly_2004") 
+```
+
+```{r}
+mpb2005= st_read("../data/mpb_poly_1997to2011/ibm_poly_2005.shp", "ibm_poly_2005") 
+```
+
+```{r}
+mpb2006= st_read("../data/mpb_poly_1997to2011/ibm_poly_2006.shp", "ibm_poly_2006") 
+```
+
+```{r}
+mpb2007= st_read("../data/mpb_poly_1997to2011/ibm_poly_2007.shp", "ibm_poly_2007") 
+```
+
+## VRI 
+```{r}
+en_vri= st_read("../data/VRI1/Entiako_VRI.shp", "Entiako_VRI") 
+```
+
+```{r}
+tw_vri= st_read("../data/VRI1/Tweeds_VRI.shp", "Tweeds_VRI") 
+```
+
+```{r}
+ch_vri_all= st_read("../data/VRI1/CH_2014_VRI.shp", "CH_2014_VRI") 
+```
+
+## Perimeters
+
+## Data
+```{r}
+fires = st_read("../data/PROT_HISTORICAL_FIRE_POLYS_SP/H_FIRE_PLY_polygon.shp", "H_FIRE_PLY_polygon") 
+```
+
+## Select Fires
+```{r}
+fire3 = fires %>%
+  filter(FIRE_YEAR>2011) %>%
+  filter(FIRE_YEAR<2015) %>%
+  filter(SIZE_HA>3000) %>%
+  filter(FIRE_NO %in% c("R10171", "R10252", "R10070"))
+
+fire3
+```
+
+
+
+## Sampled points
+```{r}
+ch_df = read.csv("../data/2.1-GEE-Sampled/2021-06-07_ChSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
+en_df = read.csv("../data/2.1-GEE-Sampled/2021-06-07_EnSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
+tw_df = read.csv("../data/2.1-GEE-Sampled/2021-06-07_TwSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+### Full data
+```{r}
+df = read.csv("../data/CombinedData/CombineDataCat3FWI.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+# Look at data
+```{r}
+head(df)
+head(ch_df)
+```
+```{r}
+unique(df$FireYr)
+```
+
+```{r}
+df %>% filter(FireYr==2014)
+```
+
+# Subset 150
+```{r}
+set.seed(10)
+df_subset = df %>% 
+  dplyr::select(LAT, LON, dnbr, dndmi, ndviprefire, FireYr) %>% 
+   group_by(FireYr) %>%
+  filter_at(vars(LAT,LON),any_vars(!is.na(.))) %>%
+  sample_n(., 150, replace = FALSE)
+```
+
+```{r}
+
+```
+
+```{r}
+unique(df_subset$FireYr)
+```
+# Subset individual data samples
+```{r}
+set.seed(10)
+ch_df_subset = ch_df %>% 
+  dplyr::select(LAT, LON, dnbr, dndmi, ndviprefire) %>% 
+  filter_at(vars(LAT,LON),any_vars(!is.na(.))) %>%
+  sample_n(., 100, replace = FALSE) %>%
+  mutate(FireYr=2014)
+```
+
+```{r}
+set.seed(10)
+tw_df_subset = tw_df %>% 
+  dplyr::select(LAT, LON, dnbr, dndmi, ndviprefire) %>% 
+  filter_at(vars(LAT,LON),any_vars(!is.na(.))) %>%
+  sample_n(., 40, replace = FALSE) %>%
+  mutate(FireYr=2013)
+```
+
+```{r}
+set.seed(10)
+en_df_subset = en_df %>% 
+  dplyr::select(LAT, LON, dnbr, dndmi, ndviprefire) %>% 
+  filter_at(vars(LAT,LON),any_vars(!is.na(.))) %>%
+  sample_n(., 60, replace = FALSE) %>%
+  mutate(FireYr=2012)
+```
+
+
+# Convert to points
+
+```{r}
+df_subset_pt = st_as_sf(df_subset, coords = c("LON", "LAT"), crs = wgs_proj)
+```
+
+
+```{r}
+ch_subset_pt = st_as_sf(ch_df_subset, coords = c("LON", "LAT"), crs = wgs_proj)
+en_subset_pt = st_as_sf(en_df_subset, coords = c("LON", "LAT"), crs = wgs_proj)
+tw_subset_pt = st_as_sf(tw_df_subset, coords = c("LON", "LAT"), crs = wgs_proj)
+```
+
+
+```{r}
+plot(st_geometry(df_subset_pt))
+```
+
+# Transform to VRI projection
+
+```{r}
+vri_project = st_crs(tw_vri)
+```
+
+```{r}
+df_subset_pt_vri = st_transform(df_subset_pt, crs = vri_project)
+```
+
+```{r}
+ch_pt_vri = st_transform(ch_subset_pt, crs = vri_project)
+en_pt_vri = st_transform(en_subset_pt, crs = vri_project)
+tw_pt_vri = st_transform(tw_subset_pt, crs = vri_project)
+```
+
+# Filter by fire year
+
+```{r}
+tw_pt = df_subset_pt_vri %>% filter(FireYr ==2013)
+en_pt = df_subset_pt_vri %>% filter(FireYr ==2012)
+```
+
+# Overlay
+
+```{r}
+tw_data = st_join(tw_pt_vri, tw_vri)
+en_data = st_join(en_pt_vri, en_vri)
+ch_data = st_join(ch_pt_vri, ch_vri)
+```
+
+```{r}
+tw_data
+```
+
+# Combine data frames
+```{r}
+combo_data = rbind(tw_data, en_data)
+combo_data1 = rbind(combo_data, ch_data)
+```
+
+```{r}
+combo_data1
+```
+```{r}
+combo_data2 = combo_data1 %>% filter_at(vars(SPECIES_CD),all_vars(!is.na(.)))
+```
+
+# Add MPB data
+```{r}
+combo3 = combo_data2 %>% dplyr::select(dnbr, dndmi, ndviprefire, FireYr, SPECIES_CD, SPECIES_PC, BASAL_AREA, LIVE_VOL_P, DEAD_VOL_P)
+combo3
+```
+```{r}
+combo_mpb2000 = st_join(combo3, mpb2000)
+combo_mpb2000
+```
+
+```{r}
+combo_mpb2001 = st_join(combo3, mpb2001)
+combo_mpb2002 = st_join(combo3, mpb2002)
+combo_mpb2003 = st_join(combo3, mpb2003)
+combo_mpb2004 = st_join(combo3, mpb2004)
+combo_mpb2005 = st_join(combo3, mpb2005)
+combo_mpb2006 = st_join(combo3, mpb2006)
+combo_mpb2007 = st_join(combo3, mpb2007)
+
+```
+
+```{r}
+unique(combo_mpb2003$SEVERITY)
+```
+# VRI species Palette
+
+```{r}
+brewer.pal(12, "PuOr")
+
+# [1] "#A6CEE3" "#1F78B4" "#B2DF8A" "#33A02C" "#FB9A99" "#E31A1C"
+# [7] "#FDBF6F" "#FF7F00" "#CAB2D6" "#6A3D9A" "#FFFF99" "#B15928"
+
+# to display that palette:
+display.brewer.pal(12, "PuOr")
+```
+"#F7F7F7", "#D8DAEB", "#8073AC", "#542788"
+
+S = "#D8DAEB"
+SB = "#B2ABD2", 
+SE = "#8073AC", 
+SW = "#542788", 
+SX = "#2D004B",
+```{r}
+breaks_nopine = c("AC",  "AT",  "BL", "L", "S", "SB", "SE", "SW",  "SX", "Missing" )
+pal_nopine = c("#B35806", "#E08214", "#FDB863", "#FEE0B6", "#D8DAEB", "#B2ABD2", "#8073AC", "#542788", "#2D004B", "#C0C0C0")
+```
+
+```{r}
+brewer.pal(8, "YlGn")
+
+# [1] "#A6CEE3" "#1F78B4" "#B2DF8A" "#33A02C" "#FB9A99" "#E31A1C"
+# [7] "#FDBF6F" "#FF7F00" "#CAB2D6" "#6A3D9A" "#FFFF99" "#B15928"
+
+# to display that palette:
+display.brewer.pal(8, "YlGn")
+```
+# Plots
+
+## NDVI Basal Area
+```{r}
+summary(lm(ndviprefire ~ BASAL_AREA, combo_data2))
+```
+```{r}
+lm_eqn1 <- function(df){
+    m <- lm(ndviprefire ~ BASAL_AREA, combo_data2);
+    eq <- substitute(~~italic(r)^2~"="~r2, 
+         list(r2 = format(summary(m)$r.squared, digits = 2)))
+    as.character(as.expression(eq));
+}
+```
+
+```{r}
+ndvi_basal = ggplot(data = combo_data2, aes(x= BASAL_AREA, y = ndviprefire, color = SPECIES_CD)) +
+  geom_point() +
+  scale_color_manual(values = c("#E08214",  "#005A32",  "#D8DAEB", "#8073AC", "#B2ABD2",  "#542788"), name="Dominant species",
+                         breaks=c("AT", "PL", "S", "SB", "SW",  "SX")) +
+  labs(x="Basal area (square meters per hectare)", y="NDVI") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) +
+ geom_text(x = 45, y = 0.5, label = lm_eqn1(df), parse = TRUE, colour="black", size=2)
+
+ndvi_basal
+```
+
+## Whole stem
+```{r}
+summary(lm(ndviprefire ~ WHOLE_STEM, combo_data2))
+```
+```{r}
+lm_eqn2 <- function(df){
+    m <- lm(ndviprefire ~ WHOLE_STEM, combo_data2);
+    eq <- substitute(~~italic(r)^2~"="~r2, 
+         list(r2 = format(summary(m)$r.squared, digits = 2)))
+    as.character(as.expression(eq));
+}
+```
+```{r}
+ndvi_wholestem = ggplot(data = combo_data2, aes(x= WHOLE_STEM, y = ndviprefire, color = SPECIES_CD)) +
+  geom_point() +
+  scale_color_manual(values = c("#E08214",  "#005A32",  "#D8DAEB", "#8073AC", "#B2ABD2",  "#542788"), name="Dominant species",
+                         breaks=c("AT", "PL", "S", "SB", "SW",  "SX")) +
+  labs(x="Whole stem biomass per hectare", y="NDVI") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) +
+ geom_text(x = 175, y = 0.5, label = lm_eqn2(df), parse = TRUE, colour="black", size=2)
+
+ndvi_wholestem
+```
+```{r}
+breaks_nopine = c("AC",  "AT",  "BL", "L", "S", "SB", "SE", "SW",  "SX", "Missing" )
+pal_nopine = c("#B35806", "#E08214", "#FDB863", "#FEE0B6", "#F7F7F7", "#D8DAEB", "#B2ABD2", "#8073AC", "#542788", "#C0C0C0")
+```
+
+```{r}
+brewer.pal(8, "YlGn")
+
+# [1] "#A6CEE3" "#1F78B4" "#B2DF8A" "#33A02C" "#FB9A99" "#E31A1C"
+# [7] "#FDBF6F" "#FF7F00" "#CAB2D6" "#6A3D9A" "#FFFF99" "#B15928"
+
+# to display that palette:
+display.brewer.pal(8, "YlGn")
+```
+
+## Dead v MPB
+```{r}
+summary(lm(dndmi ~ DEAD_VOL_P, combo_data2))
+```
+```{r}
+lm_eqn3 <- function(df){
+    m <- lm(dndmi ~ DEAD_VOL_P, combo_data2);
+    eq <- substitute(~~italic(r)^2~"="~r2, 
+         list(r2 = format(summary(m)$r.squared, digits = 2)))
+    as.character(as.expression(eq));
+}
+```
+
+```{r}
+dndmi_dead = ggplot(data = combo_data2, aes(x= DEAD_VOL_P, y = dndmi, color = SPECIES_CD)) +
+  geom_point() +
+  scale_color_manual(values = c("#E08214",  "#005A32",  "#D8DAEB", "#8073AC", "#B2ABD2",  "#542788"), name="Dominant species",
+                         breaks=c("AT", "PL", "S", "SB", "SW",  "SX")) +
+  labs(x="Dead volume per hectare", y="dNDMI") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) +
+ geom_text(x = 325, y =-150, label = lm_eqn3(df), parse = TRUE, colour="black", size=2)
+
+dndmi_dead
+```
+## Live v ndvi
+```{r}
+summary(lm(ndviprefire ~ LIVE_VOL_P, combo_data2))
+```
+```{r}
+lm_eqn4 <- function(df){
+    m <- lm(ndviprefire ~ LIVE_VOL_P, combo_data2);
+    eq <- substitute(~~italic(r)^2~"="~r2, 
+         list(r2 = format(summary(m)$r.squared, digits = 2)))
+    as.character(as.expression(eq));
+}
+```
+
+```{r}
+ndvi_live = ggplot(data = combo_data2, aes(x= LIVE_VOL_P, y = ndviprefire, color = SPECIES_CD)) +
+  geom_point() +
+  scale_color_manual(values = c("#E08214",  "#005A32",  "#D8DAEB", "#8073AC", "#B2ABD2",  "#542788"), name="Dominant species",
+                         breaks=c("AT", "PL", "S", "SB", "SW",  "SX")) +
+  labs(x="Live volume per hectare", y="NDVI") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) +
+ geom_text(x = 180, y =0.52, label = lm_eqn4(df), parse = TRUE, colour="black", size=2)
+ 
+ndvi_live
+```
+
+## Crown closure v ndvi
+```{r}
+summary(lm(ndviprefire ~ CROWN_CLOS, combo_data2))
+```
+```{r}
+lm_eqn5 <- function(df){
+    m <- lm(ndviprefire ~ CROWN_CLOS, combo_data2);
+    eq <- substitute(~~italic(r)^2~"="~r2, 
+         list(r2 = format(summary(m)$r.squared, digits = 2)))
+    as.character(as.expression(eq));
+}
+```
+
+```{r}
+ndvi_crown = ggplot(data = combo_data2, aes(x= CROWN_CLOS, y = ndviprefire, color = SPECIES_CD)) +
+  geom_point() +
+  scale_color_manual(values = c("#E08214",  "#005A32",  "#D8DAEB", "#8073AC", "#B2ABD2",  "#542788"), name="Dominant species",
+                         breaks=c("AT", "PL", "S", "SB", "SW",  "SX")) +
+  labs(x="Crown closure (%)", y="NDVI") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) +
+ geom_text(x = 80, y =0.52, label = lm_eqn5(df), parse = TRUE, colour="black", size=2)
+
+ndvi_crown
+```
+## Percent species v ndvi
+```{r}
+summary(lm(ndviprefire ~ SPECIES_PC, combo_data2))
+```
+
+```{r}
+lm_eqn6 <- function(df){
+    m <- lm(ndviprefire ~ SPECIES_PC, combo_data2);
+    eq <- substitute(~~italic(r)^2~"="~r2, 
+         list(r2 = format(summary(m)$r.squared, digits = 2)))
+    as.character(as.expression(eq));
+}
+```
+
+
+```{r}
+ndvi_percent = ggplot(data = combo_data2, aes(x= SPECIES_PC, y = ndviprefire, color = SPECIES_CD)) +
+  geom_point() +
+  scale_color_manual(values = c("#E08214",  "#005A32",  "#D8DAEB", "#8073AC", "#B2ABD2",  "#542788"), name="Dominant species",
+                         breaks=c("AT", "PL", "S", "SB", "SW",  "SX")) +
+  labs(x="Species percent", y="NDVI") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) +
+ geom_text(x = 52, y =0.51, label = lm_eqn6(df), parse = TRUE, colour="black", size=2)
+
+ndvi_percent
+```
+
+```{r}
+bottom_legend = ggplot(data = combo_data2, aes(x= SPECIES_PC, y = ndviprefire, color = SPECIES_CD)) +
+  geom_point() +
+  scale_color_manual(values = c("#E08214",  "#005A32",  "#D8DAEB", "#8073AC", "#B2ABD2",  "#542788"), name="Dominant species",
+                         breaks=c("AT", "PL", "S", "SB", "SW",  "SX")) +
+  labs(x="Species percent", y="NDVI") +
+  theme_bw() +
+   theme(legend.position = "bottom") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        legend.title = element_text(size = 8),
+              legend.text = element_text(size = 7) ) +
+  guides(color=guide_legend(nrow=1))
+
+bottom_legend 
+```
+
+# Gridded plots VRI
+```{r}
+legend = cowplot::get_legend(bottom_legend)
+```
+
+```{r fig.height=6, fig.width=6}
+
+grid_plot1 = cowplot::plot_grid( ndvi_basal, ndvi_wholestem, ndvi_percent, ndvi_crown, ndvi_live, dndmi_dead, align = "hv", ncol= 2)  
+
+grid_plot1
+```
+
+```{r fig.height=6, fig.width=6}
+plot_vri1 = plot_grid(grid_plot1, legend, ncol=1, rel_widths = c(1, .1), rel_heights = c(1, .05)) +
+   draw_label("(a)", x = .02, y = .985, size = 10) +
+   draw_label("(b)", x = .52, y = .985, size = 10) +
+   draw_label("(c)", x = .02, y = .675, size = 10) +
+   draw_label("(d)", x = .52, y = .675, size = 10) +
+   draw_label("(e)", x = .02, y = .36, size = 10) +
+   draw_label("(f)", x = .52, y = .36, size = 10) 
+
+plot_vri1
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/150SampleVRI.jpeg", plot = plot_vri1, width = 6, height = 6, units = c("in"), dpi=600, bg = "white")
+```
+
+
+# Plot MPB
+```{r}
+brewer.pal(12, "Spectral")
+
+# [1] "#A6CEE3" "#1F78B4" "#B2DF8A" "#33A02C" "#FB9A99" "#E31A1C"
+# [7] "#FDBF6F" "#FF7F00" "#CAB2D6" "#6A3D9A" "#FFFF99" "#B15928"
+
+# to display that palette:
+display.brewer.pal(12, "Spectral")
+```
+
+```{r}
+mpb_breaks = c("T","L", "M", "S", "V", "X", NA)
+mpb_palette = c("#2B83BA", "#ABDDA4", "#FFFFBF", "#FDAE61", "#D7191C", "#5E4FA2", "#542788")
+```
+
+```{r}
+SEVERITY = c("T","L", "M", "S", "V", "X", NA)
+SPECIES = c("AT", "PL", "S", "SB", "SW",  "SX")
+numbers1 = c(1, 2, 3, 4, 5, 6, 7)
+numbers3 = c(7, 6, 5, 4, 3, 2, 1)
+numbers2 = c(1, 2, 3, 4, 5, 6)
+numbers4 = c(6, 5, 4, 3, 2, 1)
+df_Severity_legend = data.frame(SEVERITY, numbers1, numbers3)
+df_species_legend = data.frame(SPECIES, numbers2, numbers4)
+```
+
+```{r}
+legend_mpb = ggplot() +
+  geom_point(data = df_Severity_legend, aes(x= numbers1, y = numbers3, color=SEVERITY)) +
+  geom_point(data=df_species_legend, aes(x= numbers2, y = numbers4, shape = SPECIES)) +
+  scale_color_manual(values = mpb_palette, name="Outbreak severity",
+                         breaks=mpb_breaks) +
+  scale_shape(name="Dominant species") +
+  theme_bw() +
+   theme(legend.position = "bottom") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 11, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        plot.subtitle = element_text(hjust = 0.1),
+        legend.title = element_text(size = 8),
+              legend.text = element_text(size = 7), 
+        legend.justification = 'center', 
+        legend.position = 'bottom', legend.box = 'vertical', 
+        legend.box.just = 'left', 
+        legend.margin = margin(-15, 0, 0, 0)) +
+  guides(color=guide_legend(nrow=1), shape=guide_legend(nrow=1))
+
+legend_mpb
+```
+
+```{r}
+plot_mpb2000 = ggplot(data = combo_mpb2000, aes(x= BASAL_AREA, y = ndviprefire)) +
+  geom_point(aes(color=SEVERITY, shape=SPECIES_CD)) +
+  scale_color_manual(values = mpb_palette, name="2000 Outbreak Severity",
+                         breaks=mpb_breaks) +
+  labs(x="Basal Area", y="NDVI", subtitle = "2000") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        plot.subtitle = element_text(hjust = 0.1, size = 9)) +
+  guides(color=guide_legend(nrow=1))
+
+plot_mpb2000
+```
+```{r}
+plot_mpb2001 = ggplot(data = combo_mpb2001, aes(x= BASAL_AREA, y = ndviprefire)) +
+  geom_point(aes(color=SEVERITY, shape=SPECIES_CD)) +
+  scale_color_manual(values = mpb_palette, name="2001 Outbreak Severity",
+                         breaks=mpb_breaks) +
+  labs(x="Basal Area", y="NDVI", subtitle = "2001") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        plot.subtitle = element_text(hjust = 0.1, size = 9)) +
+  guides(color=guide_legend(nrow=1))
+
+plot_mpb2001
+```
+
+```{r}
+plot_mpb2002 = ggplot(data = combo_mpb2002, aes(x= BASAL_AREA, y = ndviprefire)) +
+  geom_point(aes(color=SEVERITY, shape=SPECIES_CD)) +
+  scale_color_manual(values = mpb_palette, name="2002 Outbreak Severity",
+                         breaks=mpb_breaks) +
+  labs(x="Basal Area", y="NDVI", subtitle = "2002") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        plot.subtitle = element_text(hjust = 0.1, size = 9)) +
+  guides(color=guide_legend(nrow=1))
+
+plot_mpb2002
+```
+```{r}
+plot_mpb2003 = ggplot(data = combo_mpb2003, aes(x= BASAL_AREA, y = ndviprefire)) +
+  geom_point(aes(color=SEVERITY, shape=SPECIES_CD)) +
+  scale_color_manual(values = mpb_palette, name="2003 Outbreak Severity",
+                         breaks=mpb_breaks) +
+  labs(x="Basal Area", y="NDVI", subtitle = "2003") +
+  theme_bw() +
+   theme(legend.position = "bottom") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        plot.subtitle = element_text(hjust = 0.1, size = 9)) +
+  guides(color=guide_legend(nrow=1))
+
+plot_mpb2003
+```
+
+```{r}
+plot_mpb2004 = ggplot(data = combo_mpb2004, aes(x= BASAL_AREA, y = ndviprefire)) +
+  geom_point(aes(color=SEVERITY, shape=SPECIES_CD)) +
+  scale_color_manual(values = mpb_palette, name="2004 Outbreak Severity",
+                         breaks=mpb_breaks) +
+  labs(x="Basal Area", y="NDVI", subtitle = "2004") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        plot.subtitle = element_text(hjust = 0.1, size = 9)) +
+  guides(color=guide_legend(nrow=1))
+
+plot_mpb2004
+```
+
+```{r}
+plot_mpb2005 = ggplot(data = combo_mpb2005, aes(x= BASAL_AREA, y = ndviprefire)) +
+  geom_point(aes(color=SEVERITY, shape=SPECIES_CD)) +
+  scale_color_manual(values = mpb_palette, name="2005 Outbreak Severity",
+                         breaks=mpb_breaks) +
+  labs(x="Basal Area", y="NDVI", subtitle = "2005") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        plot.subtitle = element_text(hjust = 0.1, size = 9)) +
+  guides(color=guide_legend(nrow=1))
+
+plot_mpb2005
+```
+
+```{r}
+plot_mpb2006 = ggplot(data = combo_mpb2006, aes(x= BASAL_AREA, y = ndviprefire)) +
+  geom_point(aes(color=SEVERITY, shape=SPECIES_CD)) +
+  scale_color_manual(values = mpb_palette, name="2006 Outbreak Severity",
+                         breaks=mpb_breaks) +
+  labs(x="Basal Area", y="NDVI", subtitle = "2006") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size = 9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        plot.subtitle = element_text(hjust = 0.1, size = 9)) +
+  guides(color=guide_legend(nrow=1))
+
+plot_mpb2006
+```
+
+```{r}
+plot_mpb2007 = ggplot(data = combo_mpb2007, aes(x= BASAL_AREA, y = ndviprefire)) +
+  geom_point(aes(color=SEVERITY, shape=SPECIES_CD)) +
+  scale_color_manual(values = mpb_palette, name="Outbreak Severity",
+                         breaks=mpb_breaks) +
+  labs(x="Basal Area", y="NDVI", subtitle = "2007") +
+  theme_bw() +
+   theme(legend.position = "none") +
+    theme(plot.margin = unit(c(t = 0.3, r = 0.1, b = 0.3, l = 0.1), "cm")) +
+    theme(axis.title.x = element_text(size =9, hjust = 0.5, vjust = -0.1),
+        axis.title.y = element_text(size = 9, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        plot.subtitle = element_text(hjust = 0.1, size = 9)) +
+  guides(color=guide_legend(nrow=1))
+
+plot_mpb2007
+```
+
+# Gridded plots
+```{r}
+legend = cowplot::get_legend(legend_mpb)
+```
+
+```{r fig.height=6, fig.width=6}
+
+grid_mpb1 = cowplot::plot_grid(plot_mpb2000, plot_mpb2001, plot_mpb2002, plot_mpb2003, plot_mpb2004, plot_mpb2005, plot_mpb2006, plot_mpb2007, align = "hv", ncol= 2)  
+
+grid_mpb1
+```
+
+```{r fig.height=7, fig.width=6}
+plot_mpb2 = plot_grid(grid_mpb1, legend, ncol=1, rel_widths = c(1, .1), rel_heights = c(1, .08)) 
+
+plot_mpb2
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/150SampleMPB.jpeg", plot = plot_mpb2, width = 6, height = 7, units = c("in"), dpi=600, bg = "white")
+```
