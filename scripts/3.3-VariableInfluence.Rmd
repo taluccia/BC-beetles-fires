@@ -22,9 +22,9 @@ library(cowplot)
 ```{r}
 bar_theme = theme_bw() + 
   theme(panel.grid.major = element_blank()) +
-    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
+    theme(axis.title.y = element_text(size = 10, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
         axis.line = element_line(colour = "black")) 
 ```
 
@@ -62,7 +62,7 @@ allData = bind_rows(full, extreme, moderate, benign) %>%
 # Variabile Influence 
 
 
-```{r fig.height=4, fig.width=3}
+```{r fig.height=4, fig.width=4}
 varInfPlot = allData %>% ggplot(aes(x = forcats::fct_reorder(.f = vnames, 
                                       .x = rel.inf), 
              y = rel.inf, 
@@ -75,16 +75,16 @@ varInfPlot = allData %>% ggplot(aes(x = forcats::fct_reorder(.f = vnames,
    scale_x_discrete(
     "Explanatory Variables",
     labels = c(
-      "fwi" = "FWI",
-      "ndviprefire" = "NDVI",
+      "fwi" = "Fire Weather\n(FWI)",
+      "ndviprefire" = "Prefire vegetation\n(NDVI)",
       "elevation" = "Elevation",
-      "dndmi" = "dNDMI")) +
+      "dndmi" = "Outbreak severity\n(dNDMI)")) +
   ylab('Relative Influence') +
   theme(legend.position =c(.79, .14),
-              legend.title = element_text(size = 10),
-              legend.text = element_text(size = 10),
-              legend.key.height = unit(.15, 'in'), 
-        legend.key.width = unit(.15, 'in'),
+              legend.title = element_text(size = 8),
+              legend.text = element_text(size = 7),
+              legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.1, 'in'),
         legend.background = element_rect(fill=alpha('white', 0.0))) +
   guides(fill = guide_legend( ncol=1))
  
@@ -94,5 +94,5 @@ varInfPlot
 
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/RelativeInfluence3FWI_v2.tiff", plot = varInfPlot, width = 3, height =4, units = c("in"), dpi=600 )
+ggsave("../figures/RelativeInfluence3FWI_v2.tiff", plot = varInfPlot, width = 4, height =4, units = c("in"), dpi=600 )
 ```
