@@ -7,8 +7,6 @@ output: html_document
 
 
 
-
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -289,7 +287,24 @@ all_mod_plots4
 ```
 
 
+# Function to go from logit to probability
+```{r}
+logit2prob <- function(logit){
+  odds <- exp(logit)
+  prob <- odds / (1 + odds)
+  return(prob)
+}
+```
 
+```{r}
+logit2prob(-2.197225)
+logit2prob(-0.8472979)
+
+logit2prob(0)
+
+logit2prob(0.8472979)
+logit2prob(2.197225)
+```
 
 ## Manuscript Figure
 
