@@ -36,6 +36,15 @@ twdata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_TWSampledValues.csv", head
 chdata = read.csv("../data/2.1-GEE-Sampled/2021-06-07_ChSampledValues.csv", header=TRUE, sep = ",", strip.white = TRUE)
 ```
 
+# Data
+```{r}
+data = read.csv("../data/CombinedData/CombineDataCat3FWI.csv", header=TRUE, sep = ",", strip.white = TRUE)
+```
+
+
+```{r}
+head(data)
+```
 
 # Data Inspection
 ```{r}
@@ -222,7 +231,6 @@ h5 = ggplot(df, aes(x=rdnbr)) + geom_histogram(color="black", fill="white") +
 
 
 
-
 ```{r fig.height=6, fig.width=6}
 ( grid3 = cowplot::plot_grid(h1, h2, h4, h3, h5, labels = c("(a)", "(b)", "(c)", "(d)", "(e)"), label_fontface = 'plain', label_size = 12, align = "hv", ncol= 2) )
 ```
@@ -231,4 +239,110 @@ h5 = ggplot(df, aes(x=rdnbr)) + geom_histogram(color="black", fill="white") +
 ggsave("../figures/histograms.jpeg", plot = grid3, width = 6, height = 6, units = c("in"), dpi=600 )
 ```
 
+
+# Histogram with burning conditions
+```{r}
+head(data)
+```
+
+```{r}
+data$fwi_cat <- factor(data$fwi_cat, levels = c("benign", "moderate", "extreme"),
+                  labels = c("Benign", "Moderate", "Extreme")
+                  )
+```
+
+```{r}
+p1 = ggplot(data, aes(x=dndmi)) + geom_histogram(color="black", fill="white") +
+  xlab("dNDMI") +
+  theme_bw(base_size = 12) +
+  theme(plot.margin = unit(c(0.05, 0.2, 0.05, 0.5), "cm"),
+           axis.text.x = element_text(size = 8, color = "black"),
+          axis.text.y = element_text(size = 8, color = "black"),
+        axis.title.x = element_text(size=10,color = "black"),
+        axis.title.y = element_text(size=10,color = "black")) +
+  facet_wrap(~fwi_cat) +
+  theme(
+  strip.background = element_blank(),
+  strip.text.x = element_blank()
+)
+
+p1
+```
+
+```{r}
+p2 = ggplot(data, aes(x=ndviprefire)) + geom_histogram(color="black", fill="white") +
+  xlab("NDVI") +
+  theme_bw(base_size = 12) +
+                theme(plot.margin = unit(c(0.05, 0.2, 0.05, 0.5), "cm"),
+           axis.text.x = element_text(size = 8, color = "black"),
+          axis.text.y = element_text(size = 8, color = "black"),
+        axis.title.x = element_text(size=10,color = "black"),
+        axis.title.y = element_text(size=10,color = "black")) +
+  facet_wrap(~fwi_cat) +
+  theme(
+  strip.background = element_blank(),
+  strip.text.x = element_blank()
+)
+```
+
+```{r}
+p3 = ggplot(data, aes(x=fwi)) + geom_histogram(color="black", fill="white") +
+  xlab("FWI") +
+  theme_bw(base_size = 12) +
+  theme(plot.margin = unit(c(0.05, 0.2, 0.05, 0.5), "cm"),
+           axis.text.x = element_text(size = 8, color = "black"),
+          axis.text.y = element_text(size = 8, color = "black"),
+        axis.title.x = element_text(size=10,color = "black"),
+        axis.title.y = element_text(size=10,color = "black")) +
+  facet_wrap(~fwi_cat) +
+  theme(
+  strip.background = element_blank(),
+  strip.text.x = element_blank()
+)
+```
+
+```{r}
+p4 = ggplot(data, aes(x=elevation)) + geom_histogram(color="black", fill="white") +
+  xlab("Elevation (m)") +
+  theme_bw(base_size = 12) +
+  theme(plot.margin = unit(c(0.05, 0.2, 0.05, 0.5), "cm"),
+           axis.text.x = element_text(size = 8, color = "black"),
+          axis.text.y = element_text(size = 8, color = "black"),
+        axis.title.x = element_text(size=10,color = "black"),
+        axis.title.y = element_text(size=10,color = "black")) +
+  facet_wrap(~fwi_cat) +
+  theme(
+  strip.background = element_blank(),
+  strip.text.x = element_blank()
+)
+```
+
+```{r}
+p5 = ggplot(data, aes(x=rdnbr)) + geom_histogram(color="black", fill="white") +
+  xlab("RdNBR") +
+  theme_bw(base_size = 12) +
+  theme(plot.margin = unit(c(0.05, 0.2, 0.05, 0.5), "cm"),
+           axis.text.x = element_text(size = 8, color = "black", angle = 45, vjust = 1, hjust = 1),
+          axis.text.y = element_text(size = 8, color = "black"),
+        axis.title.x = element_text(size=10,color = "black"),
+        axis.title.y = element_text(size=10,color = "black")) +
+  facet_wrap(~fwi_cat) +
+  theme(
+  strip.background = element_blank(),
+  strip.text.x = element_blank()
+)
+
+p5
+```
+
+```{r fig.height=7, fig.width=6}
+( plot_grid1 = cowplot::plot_grid(p1, p2, p4, p3, p5, labels = c("(a)", "(b)", "(c)", "(d)", "(e)"), label_fontface = 'plain', label_size = 10, align = "hv", ncol= 1) + 
+    draw_label("Benign", x = .18, y = .98, size = 10, fontface="bold") +
+    draw_label("Moderate", x = .48, y = .98, size =10, fontface="bold") +
+    draw_label("Extreme", x = .76, y = .98, size = 10, fontface="bold") )
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/HistogramsBurnCond.jpeg", plot = plot_grid1, width = 6, height = 7, units = c("in"), dpi=600 )
+```
 **THE END**
