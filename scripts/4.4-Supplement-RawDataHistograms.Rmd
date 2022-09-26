@@ -187,6 +187,10 @@ summary(df)
 df
 ```
 
+```{r}
+
+```
+
 # Histograms of data
 
 ```{r}
@@ -242,7 +246,14 @@ ggsave("../figures/histograms.jpeg", plot = grid3, width = 6, height = 6, units 
 
 # Histogram with burning conditions
 ```{r}
-head(data)
+data
+```
+
+```{r}
+data %>% filter(ndviprefire <.8 & ndviprefire >.6)
+```
+```{r}
+59211/66705
 ```
 
 ```{r}
