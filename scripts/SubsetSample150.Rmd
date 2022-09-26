@@ -66,9 +66,22 @@ tw_vri= st_read("../data/VRI1/Tweeds_VRI.shp", "Tweeds_VRI")
 ```
 
 ```{r}
-ch_vri_all= st_read("../data/VRI1/CH_2014_VRI.shp", "CH_2014_VRI") 
+ch_vri= st_read("../data/VRI1/CH_2014_VRI.shp", "CH_2014_VRI") 
+```
+```{r}
+unique(en_vri$REFERENCE_)
+unique(en_vri$ATTRIBUTIO)
 ```
 
+```{r}
+unique(tw_vri$REFERENCE_)
+unique(tw_vri$ATTRIBUTIO)
+```
+
+```{r}
+unique(ch_vri$REFERENCE_)
+unique(ch_vri$ATTRIBUTIO)
+```
 ## Perimeters
 
 ## Data
@@ -217,6 +230,10 @@ tw_data
 ```{r}
 combo_data = rbind(tw_data, en_data)
 combo_data1 = rbind(combo_data, ch_data)
+```
+
+```{r}
+summary(combo_data1)
 ```
 
 ```{r}
