@@ -137,7 +137,27 @@ Figure out plot limits (if want all the same) by binding all groups together and
 ```{r}
 range(bind_rows(pred_mods4)$center_y)
 ```
+### Plot
+```{r}
+ggplot(data = pred_mods4[[1]], aes(x = x, y = center_y, linetype = model, color = model) ) +
+        geom_smooth(span = 0.5, se = TRUE) + # choose span? 
+        scale_color_manual(values = c('#d7191c','#fdae61','#abd9e9','#2c7bb6'), name = "Fire weather", guide = guide_legend(reverse=TRUE)) +
+        scale_linetype_manual(values = c("solid", "longdash", "twodash", "dotdash"), name = "Fire weather", guide = guide_legend(reverse=TRUE)) +
+        labs(x = x_names4[[1]]) +
+        theme_bw(base_size = 12) +
+        theme(axis.text.x = element_text(size = 10, color = "black"),
+              axis.text.y = element_text(size = 10, color = "black"),
+              panel.border = element_rect(color = "black", size = 1.25),
+              panel.grid.major = element_line(color = 'white', linetype = 'dashed'), panel.grid.minor = element_blank(),
+              legend.position = "bottom",
+              legend.title = element_text(size = 14),
+              legend.text = element_text(size = 14)) +
+        scale_x_continuous(labels = scales::format_format(scientific = FALSE)) +
+        #scale_x_continuous(labels = comma) +
+        #ylim(-1.55, 1.55) +
+        geom_hline(yintercept=0)
 
+```
 ### Plot with improved x axis names ----
 ```{r}
 model_id <- ggplot(data = pred_mods4[[1]], aes(x = x, y = center_y, linetype = model, color = model) ) +
@@ -519,6 +539,90 @@ grid_msplot4
 
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/PartialPlot3FWI_v2_rugstaggered.tiff", plot = grid_msplot4, width = 6, height =5.25, units = c("in"), dpi=600, bg = "white" )
+```
+
+
+# Fitted Function with Stagered rug plots
+```{r}
+fitted_pardep_plot_mods4 = function(data, x_var) {
+     ggplot(data = data, aes(x = x, y = center_y, color = model) ) +
+    geom_smooth(span = 0.5, se = TRUE, level = 0.90, fullrange = FALSE, aes(fill = model),size = .5, alpha = 0.25) + # choose span? 
+    scale_color_manual(values = c("#56B4E9", "#D55E00", "#999999", "#F0E442")) +
+    scale_fill_manual(values = c("#56B4E9", "#D55E00", "#999999", "#F0E442")) +
+                labs(x = x_var) +
+    geom_rug(data = subset(data, model=="Extreme"),sides="t") +
+    geom_rug(data = subset(data, model=="Moderate"),sides="b", outside=F) +
+    geom_rug(data = subset(data, model=="Benign"),sides="t", outside=T) +
+    coord_cartesian(clip="off") +
+                theme_bw(base_size = 12) +
+                theme(plot.margin = unit(c(1, 0.2, 0.05, 0.5), "cm")) +
+                theme(axis.text.x = element_text(size = 10, color = "black"),
+                      axis.text.y = element_text(size = 10, color = "black"),
+                      panel.border = element_rect(color = "black", size = 1.25),
+                      panel.grid.major = element_line(color = 'white', linetype = 'dashed'), panel.grid.minor = element_blank(),
+                      legend.position = "none") +
+                scale_x_continuous(labels = scales::format_format(scientific = FALSE)) +
+                scale_x_continuous(labels = comma) +
+                ylim(-1.55, 1.55) +
+                geom_hline(yintercept=0)+
+                
+                scale_y_continuous( name="Fitted function")
+}
+
+fitted_pardep_plot_mods4(data = pred_mods4[[1]], x_var = x_names4[[1]])
+```
+
+### Loop through the models and the x variable names
+    simultaneously with map2()
+```{r}
+all_mod_plots4_fitted = map2(pred_mods4, x_names4, fitted_pardep_plot_mods4)
+all_mod_plots4_fitted
+```
+
+
+
+### Manuscript Figure
+
+
+```{r}
+legend_bottom <- get_legend(legBottom) 
+```
+Order plots
+-- FWI
+-- Elevation
+-- NDVI
+-- dNDMI
+
+
+```{r fig.height=5, fig.width=6}
+msplot5 = cowplot::plot_grid( all_mod_plots4_fitted$fwi, all_mod_plots4_fitted$ndviprefire,  all_mod_plots4_fitted$elevation, all_mod_plots4_fitted$dndmi, ncol = 2) +
+  
+    draw_label("benign", x = .16, y = .62, size = 9) +
+    draw_label("moderate", x = .27, y = .62, size = 9) +
+   draw_label("extreme", x = .42, y = .62, size = 9) +
+    draw_label("dead/\nsparse", x = .75, y = .63, size = 9) +
+    draw_label("live/\ndense", x = .9, y = .63, size = 9) +
+      draw_label("low", x = .2, y = .12, size = 9) +
+   draw_label("high", x = .4, y = .12, size = 9) +
+   draw_label("no\nmortality", x = .7, y = .14, size = 9) +
+   draw_label("high\nmortality", x = .9, y = .14, size = 9) +
+   draw_label("(a)", x = .14, y = .95, size = 10) +
+   draw_label("(b)", x = .64, y = .95, size = 10) +
+   draw_label("(c)", x = .14, y = .45, size = 10) +
+   draw_label("(d)", x = .64, y = .45, size = 10) 
+
+msplot5
+```
+
+```{r fig.height=5.25, fig.width=6}
+grid_msplot6 = cowplot::plot_grid(msplot5, legend_bottom, ncol=1, rel_heights = c(1, .1))
+
+grid_msplot6
+```
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/PartialPlot3FWI_v2_Rug_fitted.tiff", plot = grid_msplot6, width = 6, height =5.25, units = c("in"), dpi=600, bg = "white" )
 ```
 
 **THE END**
