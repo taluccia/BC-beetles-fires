@@ -10,6 +10,21 @@ output: html_document
 # Library 
 ```{r}
 library(corrplot)
+library(ggpubr)
+library(tidyverse)
+library(cowplot)
+```
+
+# Plot theme
+```{r}
+reg_theme = theme_bw() + theme(legend.position = "none") +
+  theme(plot.margin = unit(c(t = 0.3, r = 0.3, b = 0.3, l = 0.1), "cm")) +
+  theme(axis.title.x = element_text(size = 10, hjust = 0.4, vjust = -0.1),
+        axis.title.y = element_text(size = 10, hjust = 0.4, vjust = 1.1),
+        axis.text.x = element_text(size = 8, color = "black"),
+        axis.text.y = element_text(size = 8, color = "black"),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"))
 ```
 
 # Data
@@ -28,10 +43,7 @@ data1
 corrplot(cor(data1), is.corr = FALSE, method="number")
 ```
 
-```{r}
-corrplot(cor(data1), type="upper", order="hclust",
-         col=brewer.pal(n=8, name="PuOr"))
-```
+
 
 ```{r}
 corrplot(cor(data1), order = 'AOE', addCoef.col = 'black', tl.pos = 'd',
@@ -39,9 +51,96 @@ corrplot(cor(data1), order = 'AOE', addCoef.col = 'black', tl.pos = 'd',
 ```
 
 ```{r fig.height=3, fig.width=3}
-cor4 = corrplot(cor(data1), method = 'square', order = 'AOE', addCoef.col = 'black', tl.pos = 'd',
+cor4 = corrplot(cor(data1, method = c("pearson")), method = 'square', order = 'AOE', addCoef.col = 'black', tl.pos = 'd',
          cl.pos = 'n', col = COL2('BrBG'))
 
 cor4
 ```
 
+# Scatter plots with correlation values
+
+```{r}
+head(data1)
+```
+```{r}
+# install.packages("PerformanceAnalytics")
+library(PerformanceAnalytics)
+
+chart.Correlation(data1, histogram = TRUE, method = "pearson")
+```
+
+c("Outbreak severity (dNDMI)", "Elevation (m)", "Fire Weather (FWI)", "Prefire vegetation (NDVI)")
+# Draw scatter plot with pearson correlation 
+# coefficient
+```{r}
+dndmi_ndvi = ggplot( data1, aes( x=ndviprefire, y=dndmi ))+
+geom_point(size=1.5, shape=1, color= "grey50")  +
+  xlab("Prefire vegetation (NDVI)") +
+  ylab("Outbreak severity\n(dNDMI)") +
+  reg_theme
+
+```
+
+```{r}
+dndmi_fwi = ggplot( data1, aes( x=fwi, y=dndmi )) +
+geom_point(size=1.5, shape=1, color= "grey50")  +
+  xlab("Fire Weather (FWI)") +
+  ylab("Outbreak severity\n(dNDMI)") +
+  reg_theme
+```
+
+```{r}
+dndmi_elevation = ggplot( data1, aes( x=elevation, y=dndmi )) +
+geom_point(size=1.5, shape=1, color= "grey50")  +
+theme_bw() +
+  xlab("Elevation (m)") +
+  ylab("Outbreak severity\n(dNDMI)") +
+  reg_theme
+```
+
+
+```{r}
+ndvi_fwi = ggplot( data1, aes( x=fwi, y=ndviprefire )) +
+geom_point(size=1.5, shape=1, color= "grey50")  +
+  xlab("Fire Weather (FWI)") +
+  ylab("Prefire vegetation\n(NDVI)") +
+  reg_theme
+```
+
+```{r}
+ndvi_elevation = ggplot( data1, aes( x=elevation, y=ndviprefire )) +
+geom_point(size=1.5, shape=1, color= "grey50")  +
+  xlab("Elevation (m)") +
+  ylab("Prefire vegetation\n(NDVI)") +
+  reg_theme
+```
+
+```{r}
+fwi_elevation = ggplot( data1, aes( x=elevation, y=fwi )) +
+geom_point(size=1.5, shape=1, color= "grey50")  +
+  xlab("Elevation (m)") +
+  ylab("Fire Weather\n(FWI)") +
+  reg_theme
+```
+# Grid plots
+```{r fig.height=6, fig.width=6}
+
+scatter_plots = cowplot::plot_grid(dndmi_ndvi, dndmi_fwi, dndmi_elevation, ndvi_fwi, ndvi_elevation, fwi_elevation, 
+                   labels = c("(a)", "(b)", "(c)", "(d)", "(e)", "(f)"), 
+                   label_fontface = 'plain', 
+                   label_size = 12, 
+                   align = "hv", 
+                   ncol= 2) +
+    draw_label("r = -0.33", x = .16, y = .77, size = 10, fontface = "italic") +
+    draw_label("r = -0.02", x = .66, y = .77, size = 10, fontface = "italic") +
+    draw_label("r = 0.08", x = .42, y = .45, size = 10, fontface = "italic") +
+    draw_label("r = 0.05", x = .66, y = .45, size = 10, fontface = "italic") +
+    draw_label("r = 0.21", x = .42, y = .12, size = 10, fontface = "italic") +
+    draw_label("r = 0.04", x = .90, y = .12, size = 10, fontface = "italic") 
+
+scatter_plots
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/ScatterCorrelationPlots.tiff", plot = scatter_plots, width = 6, height =6, units = c("in"), dpi=600, bg = "white" )
+```
