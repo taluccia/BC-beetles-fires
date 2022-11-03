@@ -125,18 +125,19 @@ geom_point(size=1.5, shape=1, color= "grey50")  +
 # Grid plots
 ```{r fig.height=6, fig.width=6}
 
-scatter_plots = cowplot::plot_grid(dndmi_ndvi, dndmi_fwi, dndmi_elevation, ndvi_fwi, ndvi_elevation, fwi_elevation, 
+scatter_plots = cowplot::plot_grid(dndmi_ndvi, ndvi_elevation,  dndmi_elevation, ndvi_fwi,  fwi_elevation, dndmi_fwi,
                    labels = c("(a)", "(b)", "(c)", "(d)", "(e)", "(f)"), 
                    label_fontface = 'plain', 
                    label_size = 12, 
                    align = "hv", 
                    ncol= 2) +
     draw_label("r = -0.33", x = .16, y = .77, size = 10, fontface = "italic") +
-    draw_label("r = -0.02", x = .66, y = .77, size = 10, fontface = "italic") +
+  draw_label("r = 0.21", x = .90, y = .77, size = 10, fontface = "italic") +
     draw_label("r = 0.08", x = .42, y = .45, size = 10, fontface = "italic") +
     draw_label("r = 0.05", x = .66, y = .45, size = 10, fontface = "italic") +
-    draw_label("r = 0.21", x = .42, y = .12, size = 10, fontface = "italic") +
-    draw_label("r = 0.04", x = .90, y = .12, size = 10, fontface = "italic") 
+  draw_label("r = 0.04", x = .42, y = .12, size = 10, fontface = "italic") +
+    draw_label("r = -0.02", x = .66, y = .12, size = 10, fontface = "italic") 
+    
 
 scatter_plots
 ```
