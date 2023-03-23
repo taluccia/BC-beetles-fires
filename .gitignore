@@ -38,6 +38,8 @@ rsconnect/
 
 # For Mac users computer specific files
 **/.DS_Store
+**/._.DS_Store
+**/._BC-beetles-fires.Rproj
 
 # exclude specific folders from push to github
 figures/*
