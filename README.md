@@ -1,9 +1,12 @@
 # BC-beetles-fires
 
-## Overview
-This repository host scripts for processing and sampling satellite imagery to evaluate how outbreak severity effects fire severity in central interior British Columbia. These scripts support the publication of [this manuscript](add link)
+This repository contain code that is central to [this paper](https://iopscience.iop.org/article/10.1088/1748-9326/aca2c1/meta)
 
-## R Scripts
+Talucci, A. C., G. W. Meigs, A. Knudby, and M. A. Krawchuk. 2022. Fire severity and the legacy of mountain pine beetle outbreak: high-severity fire peaks with mixed live and dead vegetation. Environmental Research Letters 17:124010.
+
+![image info](image/figure2.png)
+
+### Data processing and analysis
 
 * 1.1-Fire-perimeter.Rmd
 * 1.2-Raster-to-Point.Rmd
