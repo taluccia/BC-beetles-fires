@@ -1,10 +1,10 @@
 # BC-beetles-fires
 
-This repository contain code that is central to [this paper](https://iopscience.iop.org/article/10.1088/1748-9326/aca2c1/meta)
+This repository contain code that is central to [the below paper linked here](https://iopscience.iop.org/article/10.1088/1748-9326/aca2c1/meta)
 
 Talucci, A. C., G. W. Meigs, A. Knudby, and M. A. Krawchuk. 2022. Fire severity and the legacy of mountain pine beetle outbreak: high-severity fire peaks with mixed live and dead vegetation. Environmental Research Letters 17:124010.
 
-![image info](image/figure2.png)
+![image info](images/figure2.png)
 
 ### Data processing and analysis
 
